@@ -8,9 +8,9 @@ export const env = createEnv({
 
     JWT_SECRET: z.string(),
 
-    GITHUB_OAUTH_CLIENT_ID: z.string(),
-    GITHUB_OAUTH_CLIENT_SECRET: z.string(),
-    GITHUB_OAUTH_CLIENT_REDIRECT_URI: z.string().url(),
+    GITHUB_OAUTH_CLIENT_ID: z.string().optional(),
+    GITHUB_OAUTH_CLIENT_SECRET: z.string().optional(),
+    GITHUB_OAUTH_CLIENT_REDIRECT_URI: z.string().url().optional(),
   },
   client: {},
   shared: {
