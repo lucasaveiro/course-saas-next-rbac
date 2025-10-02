@@ -55,7 +55,7 @@ model Account {
 model Invite {
   id        String   @id @default(uuid())
   email     String
-  role      String   // Valores possíveis: "ADMIN", "MEMBER", "BILLING"
+  role      String   // Valores possíveis: "ADMIN", "STORE_OWNER", "CUSTOMER"
   createdAt DateTime @default(now()) @map("created_at")
 
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -71,7 +71,7 @@ model Invite {
 
 model Member {
   id   String @id @default(uuid())
-  role String @default("MEMBER") // Valores possíveis: "ADMIN", "MEMBER", "BILLING"
+  role String @default("STORE_OWNER") // Valores possíveis: "ADMIN", "STORE_OWNER", "CUSTOMER"
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String       @map("organization_id")

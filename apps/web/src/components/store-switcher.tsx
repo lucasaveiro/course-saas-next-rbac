@@ -5,7 +5,7 @@ import { ChevronsUpDown, Loader2, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
-import { getProjects } from '@/http/get-projects'
+import { getStores } from '@/http/get-stores'
 
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import {
@@ -19,21 +19,21 @@ import {
 } from './ui/dropdown-menu'
 import { Skeleton } from './ui/skeleton'
 
-export function ProjectSwitcher() {
-  const { slug: orgSlug, project: projectSlug } = useParams<{
+export function StoreSwitcher() {
+  const { slug: orgSlug, store: storeSlug } = useParams<{
     slug: string
-    project: string
+    store: string
   }>()
 
   const { data, isLoading } = useQuery({
-    queryKey: [orgSlug, 'projects'],
-    queryFn: () => getProjects(orgSlug),
+    queryKey: [orgSlug, 'stores'],
+    queryFn: () => getStores(orgSlug),
     enabled: !!orgSlug,
   })
 
-  const currentProject =
-    data && projectSlug
-      ? data.projects.find((project) => project.slug === projectSlug)
+  const currentStore =
+    data && storeSlug
+      ? data.stores.find((store) => store.slug === storeSlug)
       : null
 
   return (
@@ -46,20 +46,20 @@ export function ProjectSwitcher() {
           </>
         ) : (
           <>
-            {currentProject ? (
+            {currentStore ? (
               <>
                 <Avatar className="size-4">
-                  {currentProject.avatarUrl && (
-                    <AvatarImage src={currentProject.avatarUrl} />
+                  {currentStore.avatarUrl && (
+                    <AvatarImage src={currentStore.avatarUrl} />
                   )}
                   <AvatarFallback />
                 </Avatar>
                 <span className="truncate text-left">
-                  {currentProject.name}
+                  {currentStore.name}
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">Select project</span>
+              <span className="text-muted-foreground">Select store</span>
             )}
           </>
         )}
@@ -77,19 +77,19 @@ export function ProjectSwitcher() {
         className="w-[200px]"
       >
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Projects</DropdownMenuLabel>
+          <DropdownMenuLabel>Stores</DropdownMenuLabel>
           {data &&
-            data.projects.map((project) => {
+            data.stores.map((store) => {
               return (
-                <DropdownMenuItem key={project.id} asChild>
-                  <Link href={`/org/${orgSlug}/project/${project.slug}`}>
+                <DropdownMenuItem key={store.id} asChild>
+                  <Link href={`/org/${orgSlug}/store/${store.slug}`}>
                     <Avatar className="mr-2 size-4">
-                      {project.avatarUrl && (
-                        <AvatarImage src={project.avatarUrl} />
+                      {store.avatarUrl && (
+                        <AvatarImage src={store.avatarUrl} />
                       )}
                       <AvatarFallback />
                     </Avatar>
-                    <span className="line-clamp-1">{project.name}</span>
+                    <span className="line-clamp-1">{store.name}</span>
                   </Link>
                 </DropdownMenuItem>
               )
@@ -97,7 +97,7 @@ export function ProjectSwitcher() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/org/${orgSlug}/create-project`}>
+          <Link href={`/org/${orgSlug}/create-store`}>
             <PlusCircle className="mr-2 size-4" />
             Create new
           </Link>

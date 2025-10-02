@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcryptjs'
@@ -93,11 +94,11 @@ async function seed() {
             },
             {
               userId: anotherUser.id,
-              role: 'MEMBER',
+              role: 'STORE_OWNER',
             },
             {
               userId: anotherUser2.id,
-              role: 'MEMBER',
+              role: 'STORE_OWNER',
             },
           ],
         },
@@ -107,8 +108,8 @@ async function seed() {
 
   await prisma.organization.create({
     data: {
-      name: 'Acme Inc (Billing)',
-      slug: 'acme-billing',
+      name: 'Acme Inc (Customer)',
+      slug: 'acme-customer',
       avatarUrl: faker.image.avatarGitHub(),
       ownerId: user.id,
       projects: {
@@ -155,7 +156,7 @@ async function seed() {
           data: [
             {
               userId: user.id,
-              role: 'BILLING',
+              role: 'CUSTOMER',
             },
             {
               userId: anotherUser.id,
@@ -163,7 +164,7 @@ async function seed() {
             },
             {
               userId: anotherUser2.id,
-              role: 'MEMBER',
+              role: 'STORE_OWNER',
             },
           ],
         },
@@ -221,7 +222,7 @@ async function seed() {
           data: [
             {
               userId: user.id,
-              role: 'MEMBER',
+              role: 'STORE_OWNER',
             },
             {
               userId: anotherUser.id,
@@ -229,7 +230,7 @@ async function seed() {
             },
             {
               userId: anotherUser2.id,
-              role: 'MEMBER',
+              role: 'STORE_OWNER',
             },
           ],
         },

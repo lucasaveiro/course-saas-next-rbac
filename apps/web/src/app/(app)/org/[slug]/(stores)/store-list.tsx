@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 import { getCurrentOrg } from '@/auth/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -12,44 +13,46 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { getProjects } from '@/http/get-projects'
+import { getStores } from '@/http/get-stores'
 
 dayjs.extend(relativeTime)
 
-export async function ProjectList() {
+export async function StoreList() {
   const currentOrg = getCurrentOrg()
-  const { projects } = await getProjects(currentOrg!)
+  const { stores } = await getStores(currentOrg!)
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {projects.map((project) => {
+      {stores.map((store) => {
         return (
-          <Card key={project.id} className="flex flex-col justify-between">
+          <Card key={store.id} className="flex flex-col justify-between">
             <CardHeader>
               <CardTitle className="text-xl font-medium">
-                {project.name}
+                {store.name}
               </CardTitle>
               <CardDescription className="line-clamp-2 leading-relaxed">
-                {project.description}
+                {store.description}
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex items-center gap-1.5">
               <Avatar className="size-4">
-                {project.owner.avatarUrl && (
-                  <AvatarImage src={project.owner.avatarUrl} />
+                {store.owner.avatarUrl && (
+                  <AvatarImage src={store.owner.avatarUrl} />
                 )}
                 <AvatarFallback />
               </Avatar>
 
               <span className="truncate text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  {project.owner.name}
+                  {store.owner.name}
                 </span>{' '}
-                {dayjs(project.createdAt).fromNow()}
+                {dayjs(store.createdAt).fromNow()}
               </span>
 
-              <Button size="xs" variant="outline" className="ml-auto">
-                View <ArrowRight className="ml-2 size-3" />
+              <Button size="xs" variant="outline" className="ml-auto" asChild>
+                <Link href={`/org/${currentOrg}/store/${store.slug}`}>
+                  View <ArrowRight className="ml-2 size-3" />
+                </Link>
               </Button>
             </CardFooter>
           </Card>

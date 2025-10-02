@@ -1,67 +1,68 @@
-import { projectSchema } from '@saas/auth'
+/* eslint-disable prettier/prettier */
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
-import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
 import { UnauthorizedError } from '@/http/routes/_errors/unauthorized-error'
 import { prisma } from '@/lib/prisma'
+import { createSlug } from '@/utils/create-slug'
 import { getUserPermissions } from '@/utils/get-user-permissions'
 
-export async function deleteProject(app: FastifyInstance) {
+export async function createStore(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
-    .delete(
-      '/organizations/:slug/projects/:projectId',
+    .post(
+      '/organizations/:slug/stores',
       {
         schema: {
-          tags: ['Projects'],
-          summary: 'Delete a project',
+          tags: ['Stores'],
+          summary: 'Create a new store',
           security: [{ bearerAuth: [] }],
+          body: z.object({
+            name: z.string(),
+            description: z.string(),
+          }),
           params: z.object({
             slug: z.string(),
-            projectId: z.string().uuid(),
           }),
           response: {
-            204: z.null(),
+            201: z.object({
+              storeId: z.string().uuid(),
+            }),
           },
         },
       },
       async (request, reply) => {
-        const { slug, projectId } = request.params
+        const { slug } = request.params
         const userId = await request.getCurrentUserId()
         const { organization, membership } =
           await request.getUserMembership(slug)
 
-        const project = await prisma.project.findUnique({
-          where: {
-            id: projectId,
-            organizationId: organization.id,
-          },
-        })
-
-        if (!project) {
-          throw new BadRequestError('Project not found.')
-        }
-
         const { cannot } = getUserPermissions(userId, membership.role)
-        const authProject = projectSchema.parse(project)
 
-        if (cannot('delete', authProject)) {
+        if (cannot('create', 'Store')) {
           throw new UnauthorizedError(
-            `You're not allowed to delete this project.`,
+            `You're not allowed to create new stores.`,
           )
         }
 
-        await prisma.project.delete({
-          where: {
-            id: projectId,
+        const { name, description } = request.body
+
+        const store = await prisma.project.create({
+          data: {
+            name,
+            slug: createSlug(name),
+            description,
+            organizationId: organization.id,
+            ownerId: userId,
           },
         })
 
-        return reply.status(204).send()
+        return reply.status(201).send({
+          storeId: store.id,
+        })
       },
     )
 }

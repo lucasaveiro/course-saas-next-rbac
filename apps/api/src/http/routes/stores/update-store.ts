@@ -1,23 +1,25 @@
+/* eslint-disable prettier/prettier */
+import { storeSchema } from '@saas/auth'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
+import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
 import { UnauthorizedError } from '@/http/routes/_errors/unauthorized-error'
 import { prisma } from '@/lib/prisma'
-import { createSlug } from '@/utils/create-slug'
 import { getUserPermissions } from '@/utils/get-user-permissions'
 
-export async function createProject(app: FastifyInstance) {
+export async function updateStore(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
-    .post(
-      '/organizations/:slug/projects',
+    .put(
+      '/organizations/:slug/stores/:storeId',
       {
         schema: {
-          tags: ['Projects'],
-          summary: 'Create a new project',
+          tags: ['Stores'],
+          summary: 'Update a store',
           security: [{ bearerAuth: [] }],
           body: z.object({
             name: z.string(),
@@ -25,43 +27,52 @@ export async function createProject(app: FastifyInstance) {
           }),
           params: z.object({
             slug: z.string(),
+            storeId: z.string().uuid(),
           }),
           response: {
-            201: z.object({
-              projectId: z.string().uuid(),
-            }),
+            204: z.null(),
           },
         },
       },
       async (request, reply) => {
-        const { slug } = request.params
+        const { slug, storeId } = request.params
         const userId = await request.getCurrentUserId()
         const { organization, membership } =
           await request.getUserMembership(slug)
 
-        const { cannot } = getUserPermissions(userId, membership.role)
+        const store = await prisma.project.findUnique({
+          where: {
+            id: storeId,
+            organizationId: organization.id,
+          },
+        })
 
-        if (cannot('create', 'Project')) {
+        if (!store) {
+          throw new BadRequestError('Store not found.')
+        }
+
+        const { cannot } = getUserPermissions(userId, membership.role)
+        const authStore = storeSchema.parse(store)
+
+        if (cannot('update', authStore)) {
           throw new UnauthorizedError(
-            `You're not allowed to create new projects.`,
+            `You're not allowed to update this store.`,
           )
         }
 
         const { name, description } = request.body
 
-        const project = await prisma.project.create({
+        await prisma.project.update({
+          where: {
+            id: storeId,
+          },
           data: {
             name,
-            slug: createSlug(name),
             description,
-            organizationId: organization.id,
-            ownerId: userId,
           },
         })
 
-        return reply.status(201).send({
-          projectId: project.id,
-        })
+        return reply.status(204).send()
       },
     )
 }

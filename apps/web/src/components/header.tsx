@@ -7,7 +7,7 @@ import { ability } from '@/auth/auth'
 import { OrganizationSwitcher } from './organization-switcher'
 import { PendingInvites } from './pending-invites'
 import { ProfileButton } from './profile-button'
-import { ProjectSwitcher } from './project-switcher'
+import { StoreSwitcher } from './store-switcher'
 import { ThemeSwitcher } from './theme/theme-switcher'
 import { Separator } from './ui/separator'
 
@@ -27,10 +27,10 @@ export async function Header() {
 
         <OrganizationSwitcher />
 
-        {permissions?.can('get', 'Project') && (
+        {permissions?.can('get', 'Store') && (
           <>
             <Slash className="size-3 -rotate-[24deg] text-border" />
-            <ProjectSwitcher />
+            <StoreSwitcher />
           </>
         )}
       </div>

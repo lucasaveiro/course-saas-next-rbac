@@ -30,16 +30,16 @@ This project contains all the necessary boilerplate to setup a multi-tenant SaaS
 - [ ] It should be able to get organization members;
 - [ ] It should be able to update a member role;
 
-### Projects
+### Stores
 
-- [ ] It should be able to get projects within a organization;
-- [ ] It should be able to create a new project (name, url, description);
-- [ ] It should be able to update a project (name, url, description);
-- [ ] It should be able to delete a project;
+- [ ] It should be able to get stores within a organization;
+- [ ] It should be able to create a new store (name, url, description);
+- [ ] It should be able to update a store (name, url, description);
+- [ ] It should be able to delete a store;
 
 ### Billing
 
-- [ ] It should be able to get billing details for organization ($20 per project / $10 per member excluding billing role);
+- [ ] It should be able to get billing details for organization ($20 per project / $10 per member excluding customer role);
 
 ## RBAC
 
@@ -50,12 +50,12 @@ Roles & permissions.
 - Owner (count as administrator)
 - Administrator
 - Member
-- Billing (one per organization)
+- Customer (one per organization)
 - Anonymous
 
 ### Permissions table
 
-|                          | Administrator | Member | Billing | Anonymous |
+|                          | Administrator | Member | Customer | Anonymous |
 | ------------------------ | ------------- | ------ | ------- | --------- |
 | Update organization      | ✅            | ❌     | ❌      | ❌        |
 | Delete organization      | ✅            | ❌     | ❌      | ❌        |
@@ -65,10 +65,10 @@ Roles & permissions.
 | Transfer ownership       | ⚠️            | ❌     | ❌      | ❌        |
 | Update member role       | ✅            | ❌     | ❌      | ❌        |
 | Delete member            | ✅            | ⚠️     | ❌      | ❌        |
-| List projects            | ✅            | ✅     | ✅      | ❌        |
-| Create a new project     | ✅            | ✅     | ❌      | ❌        |
-| Update a project         | ✅            | ⚠️     | ❌      | ❌        |
-| Delete a project         | ✅            | ⚠️     | ❌      | ❌        |
+| List stores              | ✅            | ✅     | ✅      | ❌        |
+| Create a new store       | ✅            | ✅     | ❌      | ❌        |
+| Update a store           | ✅            | ⚠️     | ❌      | ❌        |
+| Delete a store           | ✅            | ⚠️     | ❌      | ❌        |
 | Get billing details      | ✅            | ❌     | ✅      | ❌        |
 | Export billing details   | ✅            | ❌     | ✅      | ❌        |
 

@@ -64,7 +64,7 @@ CREATE TABLE "organizations" (
 );
 
 -- CreateTable
-CREATE TABLE "projects" (
+CREATE TABLE "stores" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -74,8 +74,8 @@ CREATE TABLE "projects" (
     "updated_at" DATETIME NOT NULL,
     "organization_id" TEXT NOT NULL,
     "owner_id" TEXT NOT NULL,
-    CONSTRAINT "projects_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "projects_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "stores_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "stores_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -103,4 +103,4 @@ CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
 CREATE UNIQUE INDEX "organizations_domain_key" ON "organizations"("domain");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "projects_slug_key" ON "projects"("slug");
+CREATE UNIQUE INDEX "stores_slug_key" ON "stores"("slug");

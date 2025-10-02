@@ -49,17 +49,17 @@ export async function Billing() {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell>Amount of projects</TableCell>
+                <TableCell>Amount of stores</TableCell>
                 <TableCell className="text-right">
-                  {billing.projects.amount}
+                  {billing.stores.amount}
                 </TableCell>
                 <TableCell className="text-right">
-                  {billing.projects.price.toLocaleString('en-US', {
+                  {billing.stores.price.toLocaleString('en-US', {
                     style: 'currency',
                     currency: 'USD',
                   })}{' '}
                   (
-                  {billing.projects.unit.toLocaleString('en-US', {
+                  {billing.stores.unit.toLocaleString('en-US', {
                     style: 'currency',
                     currency: 'USD',
                   })}{' '}

@@ -11,16 +11,16 @@ import { permissions } from './permissions'
 import { billingSubject } from './subjects/billing'
 import { inviteSubject } from './subjects/invite'
 import { organizationSubject } from './subjects/organization'
-import { projectSubject } from './subjects/project'
+import { storeSubject } from './subjects/store'
 import { userSubject } from './subjects/user'
 
 export * from './models/organization'
-export * from './models/project'
+export * from './models/store'
 export * from './models/user'
 export * from './roles'
 
 const appAbilitiesSchema = z.union([
-  projectSubject,
+  storeSubject,
   userSubject,
   organizationSubject,
   inviteSubject,

@@ -48,14 +48,14 @@ export function CreateInviteForm() {
           )}
         </div>
 
-        <Select name="role" defaultValue="MEMBER">
+        <Select name="role" defaultValue="STORE_OWNER">
           <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="MEMBER">Member</SelectItem>
-            <SelectItem value="BILLING">Billing</SelectItem>
+            <SelectItem value="STORE_OWNER">Store Owner</SelectItem>
+            <SelectItem value="CUSTOMER">Customer</SelectItem>
           </SelectContent>
         </Select>
 

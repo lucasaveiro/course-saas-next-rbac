@@ -34,11 +34,11 @@ import { getOrganizations } from '@/http/routes/orgs/get-organizations'
 import { shutdownOrganization } from '@/http/routes/orgs/shutdown-organization'
 import { transferOrganization } from '@/http/routes/orgs/transfer-organization'
 import { updateOrganization } from '@/http/routes/orgs/update-organization'
-import { createProject } from '@/http/routes/projects/create-project'
-import { deleteProject } from '@/http/routes/projects/delete-project'
-import { getProject } from '@/http/routes/projects/get-project'
-import { getProjects } from '@/http/routes/projects/get-projects'
-import { updateProject } from '@/http/routes/projects/update-project'
+import { createStore } from '@/http/routes/stores/create-store'
+import { deleteStore } from '@/http/routes/stores/delete-store'
+import { getStore } from '@/http/routes/stores/get-store'
+import { getStores } from '@/http/routes/stores/get-stores'
+import { updateStore } from '@/http/routes/stores/update-store'
 
 import { createAccount } from './routes/auth/create-account'
 import { getInvites } from './routes/invites/get-invites'
@@ -95,11 +95,11 @@ app.register(updateOrganization)
 app.register(shutdownOrganization)
 app.register(transferOrganization)
 
-app.register(createProject)
-app.register(deleteProject)
-app.register(getProject)
-app.register(getProjects)
-app.register(updateProject)
+app.register(createStore)
+app.register(deleteStore)
+app.register(getStore)
+app.register(getStores)
+app.register(updateStore)
 
 app.register(getMembers)
 app.register(updateMember)

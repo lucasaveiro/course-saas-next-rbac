@@ -11,16 +11,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { useFormState } from '@/hooks/use-form-state'
 import { queryClient } from '@/lib/react-query'
 
-import { createProjectAction } from './actions'
+import { createStoreAction } from './actions'
 
-export function ProjectForm() {
+export function StoreForm() {
   const { slug: org } = useParams<{ slug: string }>()
 
   const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
-    createProjectAction,
+    createStoreAction,
     () => {
       queryClient.invalidateQueries({
-        queryKey: [org, 'projects'],
+        queryKey: [org, 'stores'],
       })
     },
   )
@@ -30,7 +30,7 @@ export function ProjectForm() {
       {success === false && message && (
         <Alert variant="destructive">
           <AlertTriangle className="size-4" />
-          <AlertTitle>Save project failed!</AlertTitle>
+          <AlertTitle>Save store failed!</AlertTitle>
           <AlertDescription>
             <p>{message}</p>
           </AlertDescription>
@@ -48,7 +48,7 @@ export function ProjectForm() {
       )}
 
       <div className="space-y-1">
-        <Label htmlFor="name">Project name</Label>
+        <Label htmlFor="name">Store name</Label>
         <Input name="name" id="name" />
 
         {errors?.name && (
@@ -73,7 +73,7 @@ export function ProjectForm() {
         {isPending ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          'Save project'
+          'Save store'
         )}
       </Button>
     </form>

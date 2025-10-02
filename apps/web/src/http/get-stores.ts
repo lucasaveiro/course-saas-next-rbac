@@ -1,7 +1,7 @@
 import { api } from './api-client'
 
-interface GetProjectsResponse {
-  projects: {
+interface GetStoresResponse {
+  stores: {
     description: string
     slug: string
     id: string
@@ -18,10 +18,10 @@ interface GetProjectsResponse {
   }[]
 }
 
-export async function getProjects(org: string) {
+export async function getStores(org: string) {
   const result = await api
-    .get(`organizations/${org}/projects`)
-    .json<GetProjectsResponse>()
+    .get(`organizations/${org}/stores`)
+    .json<GetStoresResponse>()
 
   return result
 }

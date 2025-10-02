@@ -7,7 +7,7 @@ interface GetBillingResponse {
       unit: number
       price: number
     }
-    projects: {
+    stores: {
       amount: number
       unit: number
       price: number

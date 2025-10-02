@@ -32,9 +32,11 @@ export function useFormState(
       }
 
       setFormState(state)
-    })
 
-    requestFormReset(form)
+      // Reset the form within the transition to satisfy React 19 constraints
+      // and avoid the "requestFormReset was called outside a transition or action" warning.
+      requestFormReset(form)
+    })
   }
 
   return [formState, handleSubmit, isPending] as const
