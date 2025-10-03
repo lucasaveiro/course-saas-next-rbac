@@ -5,8 +5,7 @@ import { z } from 'zod'
 
 import { auth } from '@/http/middlewares/auth'
 import { UnauthorizedError } from '@/http/routes/_errors/unauthorized-error'
-import { prisma } from '@/lib/prisma'
-import { createSlug } from '@/utils/create-slug'
+import { makeStoreService } from '@/modules/catalog/services/store-service'
 import { getUserPermissions } from '@/utils/get-user-permissions'
 
 export async function createStore(app: FastifyInstance) {
@@ -50,14 +49,13 @@ export async function createStore(app: FastifyInstance) {
 
         const { name, description } = request.body
 
-        const store = await prisma.project.create({
-          data: {
-            name,
-            slug: createSlug(name),
-            description,
-            organizationId: organization.id,
-            ownerId: userId,
-          },
+        const storeService = makeStoreService()
+
+        const store = await storeService.createStore({
+          name,
+          description,
+          organizationId: organization.id,
+          ownerId: userId,
         })
 
         return reply.status(201).send({

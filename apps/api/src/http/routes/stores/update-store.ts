@@ -40,7 +40,7 @@ export async function updateStore(app: FastifyInstance) {
         const { organization, membership } =
           await request.getUserMembership(slug)
 
-        const store = await prisma.project.findUnique({
+        const store = await prisma.store.findUnique({
           where: {
             id: storeId,
             organizationId: organization.id,
@@ -62,7 +62,7 @@ export async function updateStore(app: FastifyInstance) {
 
         const { name, description } = request.body
 
-        await prisma.project.update({
+        await prisma.store.update({
           where: {
             id: storeId,
           },

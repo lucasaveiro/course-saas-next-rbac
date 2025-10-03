@@ -36,7 +36,7 @@ export async function deleteStore(app: FastifyInstance) {
         const { organization, membership } =
           await request.getUserMembership(slug)
 
-        const store = await prisma.project.findUnique({
+        const store = await prisma.store.findUnique({
           where: {
             id: storeId,
             organizationId: organization.id,
@@ -56,7 +56,7 @@ export async function deleteStore(app: FastifyInstance) {
           )
         }
 
-        await prisma.project.delete({
+        await prisma.store.delete({
           where: {
             id: storeId,
           },

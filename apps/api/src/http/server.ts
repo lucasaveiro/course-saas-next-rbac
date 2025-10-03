@@ -39,6 +39,24 @@ import { deleteStore } from '@/http/routes/stores/delete-store'
 import { getStore } from '@/http/routes/stores/get-store'
 import { getStores } from '@/http/routes/stores/get-stores'
 import { updateStore } from '@/http/routes/stores/update-store'
+import { createProduct } from '@/http/routes/catalog/create-product'
+import { getProducts } from '@/http/routes/catalog/get-products'
+import { getCustomers } from '@/http/routes/customers/get-customers'
+import { registerCustomerAccount } from '@/http/routes/customers/register-customer-account'
+import { authenticateCustomer } from '@/http/routes/customers/authenticate-customer'
+import { refreshCustomerSession } from '@/http/routes/customers/refresh-customer-session'
+import { getOrders } from '@/http/routes/orders/get-orders'
+import { storefrontCart } from '@/http/routes/cart/storefront-cart'
+import { createCheckoutSession } from '@/http/routes/checkout/create-checkout-session'
+import { completeCheckout } from '@/http/routes/checkout/complete-checkout'
+import { stripeWebhook } from '@/http/routes/payments/stripe-webhook'
+import { adyenWebhook } from '@/http/routes/payments/adyen-webhook'
+import { pagarmeWebhook } from '@/http/routes/payments/pagarme-webhook'
+import { refundOrder } from '@/http/routes/payments/refund-order'
+import { captureOrderPayment } from '@/http/routes/payments/capture-order'
+import { invoiceOrder } from '@/http/routes/orders/invoice-order'
+import { startFulfillment } from '@/http/routes/orders/start-fulfillment'
+import { ordersSSE } from '@/http/routes/orders/orders-sse'
 
 import { createAccount } from './routes/auth/create-account'
 import { getInvites } from './routes/invites/get-invites'
@@ -100,6 +118,26 @@ app.register(deleteStore)
 app.register(getStore)
 app.register(getStores)
 app.register(updateStore)
+
+app.register(getProducts)
+app.register(createProduct)
+
+app.register(getCustomers)
+app.register(registerCustomerAccount)
+app.register(authenticateCustomer)
+app.register(refreshCustomerSession)
+app.register(getOrders)
+app.register(storefrontCart)
+app.register(createCheckoutSession)
+app.register(completeCheckout)
+app.register(stripeWebhook)
+app.register(adyenWebhook)
+app.register(pagarmeWebhook)
+app.register(refundOrder)
+app.register(captureOrderPayment)
+app.register(invoiceOrder)
+app.register(startFulfillment)
+app.register(ordersSSE)
 
 app.register(getMembers)
 app.register(updateMember)

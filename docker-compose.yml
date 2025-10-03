@@ -1,11 +1,21 @@
 version: '3.7'
 
-services:
-  pg:
-    image: bitnami/postgresql:latest
-    ports:
-      - '5432:5432'
-    environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=next-saas
+# SQLite não requer um serviço de banco de dados em Docker.
+# O banco é um arquivo, por exemplo: apps/api/prisma/dev.db.
+# Se você quiser rodar a API em Docker, monte esse arquivo como volume
+# dentro do contêiner da API. Exemplo de serviço (opcional):
+#
+# services:
+#   api:
+#     build: ./apps/api
+#     ports:
+#       - '3333:3333'
+#     volumes:
+#       - ./apps/api/prisma/dev.db:/app/apps/api/prisma/dev.db
+#       - ./apps/api:/app/apps/api
+#     environment:
+#       - DATABASE_URL=file:/app/apps/api/prisma/dev.db
+#       - SERVER_PORT=3333
+#       - JWT_SECRET=changeme
+
+services: {}

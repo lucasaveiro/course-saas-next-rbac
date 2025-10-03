@@ -58,7 +58,7 @@ export async function getStore(app: FastifyInstance) {
           )
         }
 
-        const store = await prisma.project.findUnique({
+        const store = await prisma.store.findUnique({
           select: {
             id: true,
             name: true,

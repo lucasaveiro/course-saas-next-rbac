@@ -18,6 +18,20 @@ export const permissions: Record<Role, PermissionsByRole> = {
     can(['create', 'get'], 'Store')
     can(['update', 'delete'], 'Store', { ownerId: { $eq: user.id } })
   },
+  STORE_ADMIN(_, { can }) {
+    can('get', 'User')
+    can('manage', 'Store')
+    can('manage', 'Product')
+  },
+  STAFF(_, { can }) {
+    can('get', 'Store')
+    can(['create', 'get', 'update'], 'Product')
+  },
+  SUPPORT(_, { can }) {
+    can('manage', 'Billing')
+    can('get', 'Store')
+    can('get', 'Product')
+  },
   CUSTOMER(_, { can }) {
     can('manage', 'Billing')
   },

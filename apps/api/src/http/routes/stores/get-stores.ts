@@ -59,7 +59,7 @@ export async function getStores(app: FastifyInstance) {
           )
         }
 
-        const stores = await prisma.project.findMany({
+        const stores = await prisma.store.findMany({
           select: {
             id: true,
             name: true,

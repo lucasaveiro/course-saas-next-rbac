@@ -13,6 +13,7 @@ import { inviteSubject } from './subjects/invite'
 import { organizationSubject } from './subjects/organization'
 import { storeSubject } from './subjects/store'
 import { userSubject } from './subjects/user'
+import { productSubject } from './subjects/product'
 
 export * from './models/organization'
 export * from './models/store'
@@ -25,6 +26,7 @@ const appAbilitiesSchema = z.union([
   organizationSubject,
   inviteSubject,
   billingSubject,
+  productSubject,
   z.tuple([z.literal('manage'), z.literal('all')]),
 ])
 

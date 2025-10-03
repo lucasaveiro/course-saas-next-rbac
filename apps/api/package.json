@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "pnpm env:load tsx watch src/http/server.ts",
     "db:migrate": "pnpm env:load prisma migrate dev",
+    "db:migrate:create": "pnpm env:load prisma migrate dev --create-only",
     "db:studio": "pnpm env:load prisma studio",
     "env:load": "dotenv -e ../../.env --",
     "build": "tsup",

@@ -3,7 +3,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-import { getCurrentOrg } from '@/auth/auth'
+import { ability, getCurrentOrg } from '@/auth/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,10 +15,14 @@ import {
 } from '@/components/ui/card'
 import { getStores } from '@/http/get-stores'
 
+import { deleteStoreAction } from './actions'
+import { ConfirmForm } from './confirm-form'
+
 dayjs.extend(relativeTime)
 
 export async function StoreList() {
   const currentOrg = getCurrentOrg()
+  const permissions = await ability()
   const { stores } = await getStores(currentOrg!)
 
   return (
@@ -54,6 +58,14 @@ export async function StoreList() {
                   View <ArrowRight className="ml-2 size-3" />
                 </Link>
               </Button>
+
+              {permissions?.can('manage', 'all') && (
+                <ConfirmForm action={deleteStoreAction.bind(null, store.id)}>
+                  <Button size="xs" variant="destructive" type="submit">
+                    Delete
+                  </Button>
+                </ConfirmForm>
+              )}
             </CardFooter>
           </Card>
         )

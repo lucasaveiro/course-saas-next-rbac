@@ -21,15 +21,15 @@ model User {
   invites            Invite[]
   member_on          Member[]
   owns_organizations Organization[]
-  owns_projects      Project[]
+  owns_stores        Store[]
 
   @@map("users")
 }
 
-// Usando String em vez de enum para TokenType
+// Using String instead of enum for TokenType
 model Token {
   id        String   @id @default(uuid())
-  type      String   // Valores possíveis: "PASSWORD_RECOVER"
+  type      String
   createdAt DateTime @default(now()) @map("created_at")
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -38,10 +38,10 @@ model Token {
   @@map("tokens")
 }
 
-// Usando String em vez de enum para AccountProvider
+// Using String instead of enum for AccountProvider
 model Account {
   id                String @id @default(uuid())
-  provider          String // Valores possíveis: "GITHUB"
+  provider          String
   providerAccountId String @unique @map("provider_account_id")
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -51,11 +51,10 @@ model Account {
   @@map("accounts")
 }
 
-// Usando String em vez de enum para Role
 model Invite {
   id        String   @id @default(uuid())
   email     String
-  role      String   // Valores possíveis: "ADMIN", "STORE_OWNER", "CUSTOMER"
+  role      String
   createdAt DateTime @default(now()) @map("created_at")
 
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -71,7 +70,7 @@ model Invite {
 
 model Member {
   id   String @id @default(uuid())
-  role String @default("STORE_OWNER") // Valores possíveis: "ADMIN", "STORE_OWNER", "CUSTOMER"
+  role String @default("STORE_OWNER")
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String       @map("organization_id")
@@ -90,7 +89,6 @@ model Organization {
   domain                    String?  @unique
   shouldAttachUsersByDomain Boolean  @default(false) @map("should_attach_users_by_domain")
   avatarUrl                 String?  @map("avatar_url")
-  createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
 
   owner   User   @relation(fields: [ownerId], references: [id])
@@ -98,12 +96,25 @@ model Organization {
 
   invites  Invite[]
   members  Member[]
-  projects Project[]
+  stores   Store[]
+  storeDomains StoreDomain[]
+
+  products      Product[]
+  categories    Category[]
+  collections   Collection[]
+  customers     Customer[]
+  carts         Cart[]
+  orders        Order[]
+  taxRates      TaxRate[]
+  discounts     Discount[]
+  salesChannels SalesChannel[]
+  mediaAssets   MediaAsset[]
 
   @@map("organizations")
 }
 
-model Project {
+// Store (renamed from Project)
+model Store {
   id          String   @id @default(uuid())
   name        String
   description String
@@ -118,5 +129,468 @@ model Project {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String @map("owner_id")
 
-  @@map("projects")
+  products      Product[]
+  categories    Category[]
+  collections   Collection[]
+  customers     Customer[]
+  carts         Cart[]
+  orders        Order[]
+  settings      StoreSetting?
+  salesChannels SalesChannel[]
+  mediaAssets   MediaAsset[]
+  discounts     Discount[]
+  taxRates      TaxRate[]
+  domain        StoreDomain?
+
+  @@map("stores")
+}
+
+// Catalog
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  slug        String   @unique
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  variants     ProductVariant[]
+  mediaAssets  MediaAsset[]
+  categories   ProductCategory[]
+  collections  ProductCollection[]
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id                String   @id @default(uuid())
+  sku               String   @unique
+  price             Decimal
+  currency          String   @default("USD")
+  inventoryQuantity Int      @map("inventory_quantity")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+
+  options     ProductOption[]
+  mediaAssets MediaAsset[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  @@map("product_variants")
+}
+
+model ProductOption {
+  id        String  @id @default(uuid())
+  name      String
+  value     String
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String         @map("variant_id")
+
+  @@map("product_options")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  parent   Category? @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  parentId String?    @map("parent_id")
+
+  products ProductCategory[]
+
+  @@map("categories")
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  products ProductCollection[]
+
+  @@map("collections")
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  url       String
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  storeId String? @map("store_id")
+
+  product   Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId String?         @map("product_id")
+
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantId String?         @map("variant_id")
+
+  @@map("media_assets")
+}
+
+// Explicit many-to-many join tables for consistent naming/mapping
+model ProductCategory {
+  id         String  @id @default(uuid())
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String   @map("category_id")
+
+  @@unique([productId, categoryId])
+  @@map("products_categories")
+}
+
+model ProductCollection {
+  id         String  @id @default(uuid())
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String     @map("collection_id")
+
+  @@unique([productId, collectionId])
+  @@map("products_collections")
+}
+
+// Customers
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  storeId String? @map("store_id")
+
+  addresses CustomerAddress[]
+  orders    Order[]
+  carts     Cart[]
+
+  // Credentials & sessions
+  credential   CustomerCredential?
+  refreshTokens CustomerRefreshToken[]
+
+  @@unique([email, organizationId])
+  @@index([email])
+  @@map("customers")
+}
+
+// Authentication for customers
+model CustomerCredential {
+  id           String   @id @default(uuid())
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String   @unique @map("customer_id")
+
+  @@map("customer_credentials")
+}
+
+model CustomerRefreshToken {
+  id         String   @id @default(uuid())
+  tokenHash  String   @map("token_hash")
+  expiresAt  DateTime @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String   @map("customer_id")
+
+  @@index([customerId])
+  @@map("customer_refresh_tokens")
+}
+
+model CustomerAddress {
+  id         String  @id @default(uuid())
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String  @map("postal_code")
+  country    String
+  isDefault  Boolean @default(false) @map("is_default")
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String   @map("customer_id")
+
+  @@map("customer_addresses")
+}
+
+// Cart / Order
+model Cart {
+  id        String   @id @default(uuid())
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?   @map("customer_id")
+
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id         String  @id @default(uuid())
+  quantity   Int
+  unitPrice  Decimal @map("unit_price")
+  totalPrice Decimal @map("total_price")
+
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId String @map("cart_id")
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantId String?         @map("variant_id")
+
+  @@map("cart_items")
+}
+
+model Order {
+  id         String   @id @default(uuid())
+  status     String   @default("PENDING")
+  total      Decimal
+  taxAmount  Decimal? @map("tax_amount")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?   @map("customer_id")
+
+  discount   Discount? @relation(fields: [discountId], references: [id], onDelete: SetNull)
+  discountId String?   @map("discount_id")
+
+  items       OrderItem[]
+  payment     Payment?
+  fulfillment Fulfillment?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  quantity   Int
+  unitPrice  Decimal @map("unit_price")
+  totalPrice Decimal @map("total_price")
+
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String @map("order_id")
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantId String?         @map("variant_id")
+
+  taxRate   TaxRate? @relation(fields: [taxRateId], references: [id], onDelete: SetNull)
+  taxRateId String?  @map("tax_rate_id")
+
+  @@map("order_items")
+}
+
+model Payment {
+  id                    String  @id @default(uuid())
+  amount                Decimal
+  status                String
+  method                String
+  providerTransactionId String? @map("provider_transaction_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String @unique @map("order_id")
+
+  @@map("payments")
+}
+
+model Fulfillment {
+  id             String   @id @default(uuid())
+  status         String
+  trackingNumber String?  @map("tracking_number")
+  shippedAt      DateTime?
+
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String @unique @map("order_id")
+
+  @@map("fulfillments")
+}
+
+// Checkout sessions to consolidate cart, address, shipping, taxes and payment intent
+model CheckoutSession {
+  id             String   @id @default(uuid())
+  status         String   @default("PENDING")
+  riskScore      Int      @default(0) @map("risk_score")
+  customerEmail  String?  @map("customer_email")
+
+  // Address snapshot
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String  @map("postal_code")
+  country    String
+
+  // Totals snapshot
+  subtotal        Decimal
+  taxAmount       Decimal  @map("tax_amount")
+  shippingAmount  Decimal  @map("shipping_amount")
+  total           Decimal
+
+  paymentIntentId String?  @map("payment_intent_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId String @unique @map("cart_id")
+
+  @@map("checkout_sessions")
+}
+
+model Discount {
+  id          String   @id @default(uuid())
+  code        String
+  amount      Decimal?
+  percentage  Decimal?
+  startsAt    DateTime?
+  endsAt      DateTime?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  storeId String? @map("store_id")
+
+  orders Order[]
+
+  @@unique([code, organizationId])
+  @@map("discounts")
+}
+
+model TaxRate {
+  id           String   @id @default(uuid())
+  name         String
+  percentage   Decimal
+  country      String?
+  state        String?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  storeId String? @map("store_id")
+
+  orderItems OrderItem[]
+
+  @@map("tax_rates")
+}
+
+// Configuration
+model StoreSetting {
+  id               String  @id @default(uuid())
+  currency         String
+  inventoryPolicy  String? @map("inventory_policy")
+  allowBackorders  Boolean @default(false) @map("allow_backorders")
+
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String @unique @map("store_id")
+
+  @@map("store_settings")
+}
+
+model SalesChannel {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String  @map("store_id")
+
+  @@map("sales_channels")
+}
+
+// Custom domain per store
+model StoreDomain {
+  id            String   @id @default(uuid())
+  domain        String   @unique
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId String @unique @map("store_id")
+
+  @@map("stores_domains")
 }

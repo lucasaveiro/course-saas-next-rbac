@@ -24,18 +24,26 @@ export function useFormState(
     const form = event.currentTarget
     const data = new FormData(form)
 
-    startTransition(async () => {
-      const state = await action(data)
-
-      if (state.success && onSuccess) {
-        await onSuccess()
+    // Call requestFormReset synchronously inside the transition to satisfy React 19.
+    // Then resolve the action promise and update state.
+    startTransition(() => {
+      try {
+        requestFormReset(form)
+      } catch (e) {
+        console.error(e)
       }
 
-      setFormState(state)
+      action(data)
+        .then(async (state) => {
+          if (state.success && onSuccess) {
+            await onSuccess()
+          }
 
-      // Reset the form within the transition to satisfy React 19 constraints
-      // and avoid the "requestFormReset was called outside a transition or action" warning.
-      requestFormReset(form)
+          setFormState(state)
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     })
   }
 
