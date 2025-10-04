@@ -152,6 +152,8 @@ model Product {
   description String
   slug        String   @unique
   isActive    Boolean  @default(true) @map("is_active")
+  qtPerPallet Int      @default(100) @map("qt_per_pallet")
+  weight      Float    @default(0) @map("weight")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -558,6 +560,10 @@ model StoreSetting {
   currency         String
   inventoryPolicy  String? @map("inventory_policy")
   allowBackorders  Boolean @default(false) @map("allow_backorders")
+  storeAddress     String? @map("store_address")
+  costPerKm        Float?  @default(0) @map("cost_per_km")
+  qtPerPallet      Int?    @default(100) @map("qt_per_pallet")
+  maxTruckPallets  Int?    @default(10) @map("max_truck_pallets")
 
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String @unique @map("store_id")

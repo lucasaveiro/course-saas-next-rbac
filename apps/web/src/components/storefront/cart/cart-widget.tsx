@@ -3,10 +3,16 @@
 import { useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { useCart } from './use-cart'
+import { AddressAutocomplete } from '@/components/address-autocomplete'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { calculateFreightCostWithAddresses } from '@/lib/google-maps'
 
 export function CartWidget() {
-  const { data, isLoading, error, updateItem, removeItem } = useCart()
+  const { data, isLoading, error, updateItem, removeItem, updateDeliveryAddress } = useCart()
   const [open, setOpen] = useState(false)
+  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [freightInfo, setFreightInfo] = useState<{ cost: number; trips: number } | null>(null)
 
   const count = data?.items.reduce((acc, i) => acc + i.quantity, 0) ?? 0
 
@@ -68,6 +74,65 @@ export function CartWidget() {
               </li>
             ))}
           </ul>
+
+          {data?.items.length > 0 && (
+            <div className="mt-4 space-y-3 border-t pt-3">
+              <div className="space-y-2">
+                <Label htmlFor="delivery-address">Endereço de entrega</Label>
+                <AddressAutocomplete
+                  id="delivery-address"
+                  value={deliveryAddress}
+                  onChange={(address) => {
+                    setDeliveryAddress(address);
+                    if (updateDeliveryAddress) {
+                      updateDeliveryAddress(address);
+                    }
+                  }}
+                  placeholder="Digite seu endereço para cálculo de frete"
+                  className="w-full"
+                />
+                {deliveryAddress && (
+                  <Button 
+                    size="sm" 
+                    className="mt-2 w-full"
+                    onClick={async () => {
+                      if (!data?.storeSettings) return;
+                      
+                      try {
+                        const totalQuantity = data.items.reduce((acc, item) => {
+                          const product = item.product;
+                          return acc + (item.quantity * (product?.qtPerPallet ? 1 : 1));
+                        }, 0);
+                        
+                        const result = await calculateFreightCostWithAddresses({
+                          originAddress: data.storeSettings.storeAddress || '',
+                          destinationAddress: deliveryAddress,
+                          costPerKm: data.storeSettings.costPerKm || 1,
+                          totalQuantity,
+                          qtPerPallet: data.storeSettings.qtPerPallet || 100,
+                          maxTruckPallets: data.storeSettings.maxTruckPallets || 10
+                        });
+                        
+                        setFreightInfo(result);
+                      } catch (err) {
+                        console.error('Erro ao calcular frete:', err);
+                      }
+                    }}
+                  >
+                    Calcular frete
+                  </Button>
+                )}
+              </div>
+              
+              {freightInfo && (
+                <div className="rounded-md bg-muted p-3 text-sm">
+                  <p className="font-medium">Informações de frete:</p>
+                  <p>Custo total: R$ {freightInfo.cost.toFixed(2)}</p>
+                  <p>Serão necessárias {freightInfo.trips} viagens para entregar todo o seu pedido.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
