@@ -46,6 +46,8 @@ export async function signInWithEmailAndPassword(data: FormData) {
         console.log(e)
       }
     }
+    // Successful login, let client-side onSuccess handle navigation
+    return { success: true, message: null, errors: null }
   } catch (err) {
     if (err instanceof HTTPError) {
       const { message } = await err.response.json()
@@ -62,5 +64,6 @@ export async function signInWithEmailAndPassword(data: FormData) {
     }
   }
 
+  // Fallback, although code should return inside try or catch
   return { success: true, message: null, errors: null }
 }

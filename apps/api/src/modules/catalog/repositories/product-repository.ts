@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export type CreateProductInput = {
   organizationId: string
@@ -6,6 +7,12 @@ export type CreateProductInput = {
   name: string
   description?: string | null
   slug: string
+  // Physical attributes
+  weight?: string
+  width?: string
+  length?: string
+  depth?: string
+  quantityPerPallet?: number
 }
 
 export class ProductRepository {
@@ -28,6 +35,11 @@ export class ProductRepository {
         name: data.name,
         description: data.description ?? null,
         slug: data.slug,
+        weight: data.weight ? new Prisma.Decimal(data.weight) : undefined,
+        width: data.width ? new Prisma.Decimal(data.width) : undefined,
+        length: data.length ? new Prisma.Decimal(data.length) : undefined,
+        depth: data.depth ? new Prisma.Decimal(data.depth) : undefined,
+        quantityPerPallet: data.quantityPerPallet ?? undefined,
       },
       select: { id: true },
     })

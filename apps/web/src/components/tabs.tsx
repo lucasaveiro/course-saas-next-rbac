@@ -1,56 +1,45 @@
-import { ability, getCurrentOrg } from '@/auth/auth'
+"use client"
+
+import { useParams } from 'next/navigation'
 
 import { NavLink } from './nav-link'
 import { Button } from './ui/button'
 
-export async function Tabs() {
-  const currentOrg = getCurrentOrg()
+export function Tabs() {
+  const { slug: orgSlug, store } = useParams<{ slug: string; store?: string }>()
 
-  const permissions = await ability()
-
-  const canUpdateOrganization = permissions?.can('update', 'Organization')
-  const canGetBilling = permissions?.can('get', 'Billing')
-
-  const canGetMembers = permissions?.can('get', 'User')
-  const canGetStores = permissions?.can('get', 'Store')
+  // Quando dentro de uma Store, escondemos as abas de Organização
+  if (store) return null
 
   return (
     <div className="border-b py-4">
       <nav className="mx-auto flex max-w-[1200px] items-center gap-2">
-        {canGetStores && (
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
-          >
-            <NavLink href={`/org/${currentOrg}`}>Stores</NavLink>
-          </Button>
-        )}
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
+        >
+          <NavLink href={`/org/${orgSlug}`}>Stores</NavLink>
+        </Button>
 
-        {canGetMembers && (
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
-          >
-            <NavLink href={`/org/${currentOrg}/members`}>Members</NavLink>
-          </Button>
-        )}
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
+        >
+          <NavLink href={`/org/${orgSlug}/members`}>Members</NavLink>
+        </Button>
 
-        {(canUpdateOrganization || canGetBilling) && (
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
-          >
-            <NavLink href={`/org/${currentOrg}/settings`}>
-              Settings & Billing
-            </NavLink>
-          </Button>
-        )}
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
+        >
+          <NavLink href={`/org/${orgSlug}/settings`}>Settings & Billing</NavLink>
+        </Button>
       </nav>
     </div>
   )

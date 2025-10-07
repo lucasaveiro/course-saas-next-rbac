@@ -13,10 +13,12 @@ interface GetStoreResponse {
   }
 }
 
-export async function getStore(org: string, storeSlug: string) {
+type Store = GetStoreResponse['store']
+
+export async function getStore(org: string, storeSlug: string): Promise<Store> {
   const result = await api
     .get(`organizations/${org}/stores/${storeSlug}`)
     .json<GetStoreResponse>()
 
-  return result
+  return result.store
 }

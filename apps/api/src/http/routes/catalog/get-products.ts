@@ -37,6 +37,12 @@ export async function getProducts(app: FastifyInstance) {
                   slug: z.string(),
                   storeId: z.string().uuid(),
                   organizationId: z.string().uuid(),
+                  // Physical attributes
+                  weight: z.string().nullable().optional(),
+                  width: z.string().nullable().optional(),
+                  length: z.string().nullable().optional(),
+                  depth: z.string().nullable().optional(),
+                  quantityPerPallet: z.number().int().nullable().optional(),
                   createdAt: z.date(),
                 }),
               ),

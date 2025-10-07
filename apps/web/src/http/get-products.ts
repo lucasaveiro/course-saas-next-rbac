@@ -6,6 +6,12 @@ interface GetProductsResponse {
     name: string
     description: string
     slug: string
+    // Physical attributes
+    weight?: string | null
+    width?: string | null
+    length?: string | null
+    depth?: string | null
+    quantityPerPallet?: number | null
     createdAt: string
   }[]
   meta: {

@@ -26,6 +26,14 @@ export async function createProduct(app: FastifyInstance) {
           body: z.object({
             name: z.string().min(2),
             description: z.string().nullable().optional(),
+            // Pricing
+            price: z.string().optional(),
+            // Physical attributes
+            weight: z.string().optional(),
+            width: z.string().optional(),
+            length: z.string().optional(),
+            depth: z.string().optional(),
+            qtPerPallet: z.number().int().min(0).optional(),
           }),
           response: {
             201: z.object({
@@ -58,7 +66,7 @@ export async function createProduct(app: FastifyInstance) {
           return reply.status(400).send({ message: 'Store not found.' })
         }
 
-        const { name, description } = request.body
+        const { name, description, price, weight, width, length, depth, qtPerPallet } = request.body
 
         const productService = makeProductService()
         const created = await productService.createProduct({
@@ -66,6 +74,12 @@ export async function createProduct(app: FastifyInstance) {
           storeId: storeId,
           name,
           description,
+          price,
+          weight,
+          width,
+          length,
+          depth,
+          quantityPerPallet: qtPerPallet,
         })
 
         return reply.status(201).send({ productId: created.id })

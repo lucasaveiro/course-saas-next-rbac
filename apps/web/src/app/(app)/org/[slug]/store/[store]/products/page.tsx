@@ -39,10 +39,16 @@ export default function ProductsPage() {
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [price, setPrice] = useState('')
+  const [weight, setWeight] = useState('')
+  const [width, setWidth] = useState('')
+  const [length, setLength] = useState('')
+  const [depth, setDepth] = useState('')
+  const [qtPerPallet, setQtPerPallet] = useState<number | ''>('')
 
   const { data: store } = useQuery({
     queryKey: [org, 'store', storeSlug],
-    queryFn: () => getStore({ org, storeSlug }),
+    queryFn: () => getStore(org, storeSlug),
     enabled: !!org && !!storeSlug,
   })
 
@@ -60,12 +66,24 @@ export default function ProductsPage() {
         storeId: store.id,
         name,
         description,
+        price: price || undefined,
+        weight: weight || undefined,
+        width: width || undefined,
+        length: length || undefined,
+        depth: depth || undefined,
+        qtPerPallet: typeof qtPerPallet === 'number' ? qtPerPallet : undefined,
       })
     },
     onSuccess: async () => {
       setIsOpen(false)
       setName('')
       setDescription('')
+      setPrice('')
+      setWeight('')
+      setWidth('')
+      setLength('')
+      setDepth('')
+      setQtPerPallet('')
       await queryClient.invalidateQueries({
         queryKey: [org, storeSlug, 'products'],
       })
@@ -108,6 +126,75 @@ export default function ProductsPage() {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="weight">Weight</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.001"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="width">Width</Label>
+                  <Input
+                    id="width"
+                    type="number"
+                    step="0.001"
+                    value={width}
+                    onChange={(e) => setWidth(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="length">Length</Label>
+                  <Input
+                    id="length"
+                    type="number"
+                    step="0.001"
+                    value={length}
+                    onChange={(e) => setLength(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="depth">Depth</Label>
+                  <Input
+                    id="depth"
+                    type="number"
+                    step="0.001"
+                    value={depth}
+                    onChange={(e) => setDepth(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="qtPerPallet">Quantity per pallet</Label>
+                <Input
+                  id="qtPerPallet"
+                  type="number"
+                  value={qtPerPallet === '' ? '' : String(qtPerPallet)}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setQtPerPallet(val === '' ? '' : Number(val))
+                  }}
+                />
+              </div>
             </div>
             <SheetFooter>
               <Button onClick={handleCreateProduct} disabled={isPending}>
@@ -135,6 +222,11 @@ export default function ProductsPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>Weight</TableHead>
+              <TableHead>Width</TableHead>
+              <TableHead>Length</TableHead>
+              <TableHead>Depth</TableHead>
+              <TableHead>Quantity per pallet</TableHead>
               <TableHead>Created at</TableHead>
             </TableRow>
           </TableHeader>
@@ -145,6 +237,11 @@ export default function ProductsPage() {
                 <TableCell className="text-muted-foreground">
                   {product.description}
                 </TableCell>
+                <TableCell>{product.weight ?? '-'}</TableCell>
+                <TableCell>{product.width ?? '-'}</TableCell>
+                <TableCell>{product.length ?? '-'}</TableCell>
+                <TableCell>{product.depth ?? '-'}</TableCell>
+                <TableCell>{product.quantityPerPallet ?? '-'}</TableCell>
                 <TableCell>
                   {new Date(product.createdAt).toLocaleString()}
                 </TableCell>

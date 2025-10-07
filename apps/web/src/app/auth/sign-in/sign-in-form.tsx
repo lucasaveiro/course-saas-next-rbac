@@ -23,7 +23,18 @@ export function SignInForm() {
   const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
     signInWithEmailAndPassword,
     () => {
-      router.push('/')
+      // Prefer a client-side navigation to avoid SSR/client hook conflicts
+      router.replace('/')
+      router.refresh()
+
+      // Hard fallback in case Router navigation is ignored in transition
+      setTimeout(() => {
+        try {
+          if (typeof window !== 'undefined') {
+            window.location.assign('/')
+          }
+        } catch {}
+      }, 200)
     },
   )
 

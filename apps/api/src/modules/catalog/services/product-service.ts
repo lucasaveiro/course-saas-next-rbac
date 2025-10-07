@@ -6,12 +6,22 @@ import {
   ensureUniqueProductSlug,
 } from '@/modules/shared/validators/tenant-rules'
 import { createSlug } from '@/utils/create-slug'
+import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 type CreateProductParams = {
   organizationId: string
   storeId: string
   name: string
   description?: string | null
+  // Physical attributes
+  weight?: string
+  width?: string
+  length?: string
+  depth?: string
+  quantityPerPallet?: number
+  // Pricing
+  price?: string
 }
 
 type UpdateProductParams = {
@@ -31,13 +41,39 @@ export class ProductService {
     const slug = createSlug(params.name)
     await ensureUniqueProductSlug(slug)
 
-    return this.repo.create({
+    const created = await this.repo.create({
       organizationId: params.organizationId,
       storeId: params.storeId,
       name: params.name,
       description: params.description ?? null,
       slug,
+      weight: params.weight,
+      width: params.width,
+      length: params.length,
+      depth: params.depth,
+      quantityPerPallet: params.quantityPerPallet,
     })
+
+    // If price provided, create a default variant for the product
+    if (params.price) {
+      const storeSetting = await prisma.storeSetting.findUnique({
+        where: { storeId: params.storeId },
+        select: { currency: true },
+      })
+      const currency = storeSetting?.currency ?? 'USD'
+      await prisma.productVariant.create({
+        data: {
+          productId: created.id,
+          sku: `${slug}-default`,
+          price: new Prisma.Decimal(params.price),
+          currency,
+          inventoryQuantity: 0,
+        },
+        select: { id: true },
+      })
+    }
+
+    return created
   }
 
   async updateProduct(
