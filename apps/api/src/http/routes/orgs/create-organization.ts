@@ -34,36 +34,61 @@ export async function createOrganization(app: FastifyInstance) {
         const userId = await request.getCurrentUserId()
 
         const { name, domain, shouldAttachUsersByDomain } = request.body
+        let organization;
 
-        if (domain) {
-          const organizationByDomain = await prisma.organization.findUnique({
-            where: {
+        try {
+          // Check for existing domain before attempting to create
+          if (domain) {
+            const organizationByDomain = await prisma.organization.findUnique({
+              where: {
+                domain,
+              },
+            })
+
+            if (organizationByDomain) {
+              throw new BadRequestError(
+                'Another organization with same domain already exists.',
+              )
+            }
+          }
+
+          organization = await prisma.organization.create({
+            data: {
+              name,
+              slug: createSlug(name),
               domain,
+              shouldAttachUsersByDomain,
+              ownerId: userId,
+              members: {
+                create: {
+                  userId,
+                  role: 'ADMIN',
+                },
+              },
             },
           })
-
-          if (organizationByDomain) {
+        } catch (error: unknown) {
+          // Handle Prisma unique constraint errors
+          if (
+            typeof error === 'object' && 
+            error !== null && 
+            'code' in error && 
+            error.code === 'P2002' && 
+            'meta' in error && 
+            error.meta && 
+            typeof error.meta === 'object' && 
+            'target' in error.meta && 
+            Array.isArray(error.meta.target) && 
+            error.meta.target.includes('domain')
+          ) {
             throw new BadRequestError(
               'Another organization with same domain already exists.',
             )
           }
+          
+          // Re-throw other errors
+          throw error
         }
-
-        const organization = await prisma.organization.create({
-          data: {
-            name,
-            slug: createSlug(name),
-            domain,
-            shouldAttachUsersByDomain,
-            ownerId: userId,
-            members: {
-              create: {
-                userId,
-                role: 'ADMIN',
-              },
-            },
-          },
-        })
 
         return reply.status(201).send({
           organizationId: organization.id,

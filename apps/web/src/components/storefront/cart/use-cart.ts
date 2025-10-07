@@ -14,9 +14,36 @@ type CartItem = {
   name: string
 }
 
+type StoreSettings = {
+  storeAddress: string
+  costPerKm: number
+  qtPerPallet: number
+  maxTruckPallets: number
+}
+
+type Product = {
+  id: string
+  qtPerPallet: number
+  weight: number
+}
+
+type CartItem = {
+  id: string
+  productId: string
+  variantId: string | null
+  quantity: number
+  unitPrice: string
+  totalPrice: string
+  inventoryQuantity: number | null
+  name: string
+  product?: Product
+}
+
 type CartResponse = {
   cartId: string
   items: CartItem[]
+  storeSettings?: StoreSettings
+  deliveryAddress?: string
 }
 
 export function useCart() {
@@ -73,5 +100,18 @@ export function useCart() {
     query.refetch()
   }
 
-  return { ...query, addItem, updateItem, removeItem }
+  const updateDeliveryAddress = async (address: string) => {
+    const res = await fetch(`/${store}/cart/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'updateAddress', address }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data?.message ?? 'Failed to update delivery address')
+    }
+    query.refetch()
+  }
+
+  return { ...query, addItem, updateItem, removeItem, updateDeliveryAddress }
 }
