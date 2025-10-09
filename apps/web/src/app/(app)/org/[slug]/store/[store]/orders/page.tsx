@@ -1,14 +1,28 @@
 'use client'
+/* eslint-disable simple-import-sort/imports */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { getOrders } from '@/http/get-orders'
-import { captureOrder, refundOrder, issueInvoice, startOrderFulfillment } from '@/http/order-actions'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { useOrdersSSE } from '@/hooks/use-orders-sse'
+import { getOrders } from '@/http/get-orders'
+import type { GetOrdersResponse } from '@/http/get-orders'
+import {
+  captureOrder,
+  issueInvoice,
+  refundOrder,
+  startOrderFulfillment,
+} from '@/http/order-actions'
 
 export default function OrdersPage() {
   const { slug: org, store: storeSlug } = useParams<{
@@ -18,7 +32,7 @@ export default function OrdersPage() {
 
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<GetOrdersResponse>({
     queryKey: [org, storeSlug, 'orders'],
     queryFn: () => getOrders({ org, storeSlug }),
     enabled: !!org && !!storeSlug,
@@ -35,26 +49,36 @@ export default function OrdersPage() {
   const invoice = useMutation({
     mutationFn: async (orderId: string) => {
       const res = await issueInvoice({ storeSlug, orderId })
-      queryClient.setQueryData([org, storeSlug, 'orders'], (prev: any) => {
-        if (!prev) return prev
-        return {
-          ...prev,
-          orders: prev.orders.map((o: any) => (o.id === orderId ? { ...o, status: res.status } : o)),
-        }
-      })
+      queryClient.setQueryData<GetOrdersResponse>(
+        [org, storeSlug, 'orders'],
+        (prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            orders: prev.orders.map((o) =>
+              o.id === orderId ? { ...o, status: res.status } : o,
+            ),
+          }
+        },
+      )
       return res
     },
   })
   const fulfill = useMutation({
     mutationFn: async (orderId: string) => {
       const res = await startOrderFulfillment({ storeSlug, orderId })
-      queryClient.setQueryData([org, storeSlug, 'orders'], (prev: any) => {
-        if (!prev) return prev
-        return {
-          ...prev,
-          orders: prev.orders.map((o: any) => (o.id === orderId ? { ...o, status: res.status } : o)),
-        }
-      })
+      queryClient.setQueryData<GetOrdersResponse>(
+        [org, storeSlug, 'orders'],
+        (prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            orders: prev.orders.map((o) =>
+              o.id === orderId ? { ...o, status: res.status } : o,
+            ),
+          }
+        },
+      )
       return res
     },
   })
@@ -83,7 +107,9 @@ export default function OrdersPage() {
           <TableBody>
             {data?.orders?.map((order) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
+                <TableCell className="font-medium">
+                  {order.id.slice(0, 8)}
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {order.status}
                 </TableCell>
@@ -98,16 +124,34 @@ export default function OrdersPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => capture.mutate(order.id)} disabled={capture.isPending}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => capture.mutate(order.id)}
+                      disabled={capture.isPending}
+                    >
                       Capturar
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => refund.mutate(order.id)} disabled={refund.isPending}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refund.mutate(order.id)}
+                      disabled={refund.isPending}
+                    >
                       Cancelar
                     </Button>
-                    <Button size="sm" onClick={() => invoice.mutate(order.id)} disabled={invoice.isPending}>
+                    <Button
+                      size="sm"
+                      onClick={() => invoice.mutate(order.id)}
+                      disabled={invoice.isPending}
+                    >
                       Emitir nota
                     </Button>
-                    <Button size="sm" onClick={() => fulfill.mutate(order.id)} disabled={fulfill.isPending}>
+                    <Button
+                      size="sm"
+                      onClick={() => fulfill.mutate(order.id)}
+                      disabled={fulfill.isPending}
+                    >
                       Fulfillment
                     </Button>
                   </div>

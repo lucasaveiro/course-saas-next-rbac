@@ -65,7 +65,7 @@ export async function getOrders(app: FastifyInstance) {
           )
         }
 
-        const store = await prisma.store.findUnique({
+        const store = await prisma.store.findFirst({
           where: { slug: storeSlug, organizationId: organization.id },
           select: { id: true },
         })

@@ -3,21 +3,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 
-type CartItem = {
-  id: string
-  productId: string
-  variantId: string | null
-  quantity: number
-  unitPrice: string
-  totalPrice: string
-  inventoryQuantity: number | null
-  name: string
-}
+// Consolidate CartItem type to include optional product details
 
 type StoreSettings = {
   storeAddress: string
   costPerKm: number
-  qtPerPallet: number
   maxTruckPallets: number
 }
 
@@ -25,6 +15,7 @@ type Product = {
   id: string
   qtPerPallet: number
   weight: number
+  quantityPerPallet?: number
 }
 
 type CartItem = {

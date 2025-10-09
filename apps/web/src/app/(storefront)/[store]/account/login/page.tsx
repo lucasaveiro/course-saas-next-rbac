@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 
-export default function CustomerLoginPage({ params }: { params: { store: string } }) {
+export default function CustomerLoginPage({
+  params,
+}: {
+  params: { store: string }
+}) {
   const storeSlug = params.store
   const [pending, setPending] = useState(false)
 
@@ -20,7 +24,9 @@ export default function CustomerLoginPage({ params }: { params: { store: string 
         className="space-y-4"
       >
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">E-mail</label>
+          <label htmlFor="email" className="block text-sm font-medium">
+            E-mail
+          </label>
           <input
             id="email"
             name="email"
@@ -32,7 +38,9 @@ export default function CustomerLoginPage({ params }: { params: { store: string 
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">Senha</label>
+          <label htmlFor="password" className="block text-sm font-medium">
+            Senha
+          </label>
           <input
             id="password"
             name="password"
@@ -54,7 +62,10 @@ export default function CustomerLoginPage({ params }: { params: { store: string 
 
       <p className="mt-4 text-sm">
         Novo por aqui?{' '}
-        <a href={`/${encodeURIComponent(storeSlug)}/account/register`} className="underline">
+        <a
+          href={`/${encodeURIComponent(storeSlug)}/account/register`}
+          className="underline"
+        >
           Criar conta
         </a>
       </p>

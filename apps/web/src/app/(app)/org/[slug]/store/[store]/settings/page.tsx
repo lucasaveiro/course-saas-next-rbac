@@ -1,8 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AddressAutocomplete } from '@/components/address-autocomplete'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { AddressAutocomplete } from '@/components/address-autocomplete'
 
 export default function StoreSettingsPage() {
   return (
@@ -47,21 +53,24 @@ export default function StoreSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Freight Settings</CardTitle>
-            <CardDescription>Configure freight calculation parameters</CardDescription>
+            <CardDescription>
+              Configure freight calculation parameters
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <AddressAutocomplete 
+            <AddressAutocomplete
               id="store-address"
               label="Store Address"
               placeholder="Enter store address"
             />
             <div className="space-y-1">
               <Label htmlFor="cost-per-km">Cost per KM</Label>
-              <Input id="cost-per-km" type="number" step="0.01" placeholder="10.00" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="qt-per-pallet">Quantity per Pallet</Label>
-              <Input id="qt-per-pallet" type="number" placeholder="100" />
+              <Input
+                id="cost-per-km"
+                type="number"
+                step="0.01"
+                placeholder="10.00"
+              />
             </div>
             <div className="space-y-1">
               <Label htmlFor="max-truck-pallets">Max Truck Pallets</Label>

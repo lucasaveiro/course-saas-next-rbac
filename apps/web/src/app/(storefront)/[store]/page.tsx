@@ -1,4 +1,5 @@
 import { resolveStoreSlug } from '@/lib/storefront'
+import { getStorefrontProducts } from '@/http/get-storefront-products'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,12 +20,19 @@ export default async function StorefrontHome({
 }) {
   const store = resolveStoreSlug(params.store)
 
-  // Placeholder featured products — replace with real fetch later
-  const featured = [
-    { id: 'p1', name: 'Featured Product 1', price: 1999 },
-    { id: 'p2', name: 'Featured Product 2', price: 2999 },
-    { id: 'p3', name: 'Featured Product 3', price: 3999 },
-  ]
+  let products: Awaited<ReturnType<typeof getStorefrontProducts>>['products'] = []
+  let disabled = false
+
+  if (store) {
+    try {
+      const result = await getStorefrontProducts({ slug: store, perPage: 12 })
+      products = result.products
+      disabled = result.disabled
+    } catch (err) {
+      // Fail soft: keep page rendering even if API hiccups
+      products = []
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -32,19 +40,35 @@ export default async function StorefrontHome({
         {store ? `${store} Store` : 'Storefront'}
       </h1>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {featured.map((p) => (
-          <article key={p.id} className="rounded border p-4">
-            <h2 className="text-base font-medium">{p.name}</h2>
+      {disabled && (
+        <p className="text-sm text-muted-foreground">
+          Esta loja está temporariamente indisponível.
+        </p>
+      )}
+
+      {!disabled && (
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {products.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {(p.price / 100).toLocaleString(undefined, {
-                style: 'currency',
-                currency: 'USD',
-              })}
+              Nenhum produto disponível no momento.
             </p>
-          </article>
-        ))}
-      </section>
+          ) : (
+            products.map((p) => (
+              <article key={p.id} className="rounded border p-4">
+                <h2 className="text-base font-medium">{p.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {p.price
+                    ? Number(p.price).toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })
+                    : '—'}
+                </p>
+              </article>
+            ))
+          )}
+        </section>
+      )}
     </div>
   )
 }

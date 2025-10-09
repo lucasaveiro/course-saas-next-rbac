@@ -1,8 +1,11 @@
+import { env } from '@saas/env'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { env } from '@saas/env'
 
-export async function POST(request: NextRequest, { params }: { params: { store: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { store: string } },
+) {
   const store = params.store
   const { action, variantId, quantity, itemId } = await request.json()
   const cookieStore = cookies()
@@ -11,15 +14,20 @@ export async function POST(request: NextRequest, { params }: { params: { store: 
   // Ensure cart exists first
   let effectiveCartId = cartId
   if (!effectiveCartId) {
-    const initRes = await fetch(`${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    })
+    const initRes = await fetch(
+      `${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+      },
+    )
     const initData = await initRes.json()
-    if (!initRes.ok) return NextResponse.json(initData, { status: initRes.status })
+    if (!initRes.ok)
+      return NextResponse.json(initData, { status: initRes.status })
     effectiveCartId = initData.cartId
-    cookieStore.set('cart_id', effectiveCartId, {
+    // Ensure type is a string when setting cookie to satisfy Next types
+    cookieStore.set('cart_id', initData.cartId, {
       httpOnly: true,
       sameSite: 'lax',
       path: '/',
@@ -28,39 +36,48 @@ export async function POST(request: NextRequest, { params }: { params: { store: 
   }
 
   if (action === 'add') {
-    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Cart-Id': effectiveCartId!,
+    const res = await fetch(
+      `${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Id': effectiveCartId!,
+        },
+        body: JSON.stringify({ variantId, quantity }),
+        cache: 'no-store',
       },
-      body: JSON.stringify({ variantId, quantity }),
-      cache: 'no-store',
-    })
+    )
     const data = await res.json().catch(() => ({}))
     return NextResponse.json(data, { status: res.status })
   }
 
   if (action === 'update') {
-    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items/${itemId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Cart-Id': effectiveCartId!,
+    const res = await fetch(
+      `${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items/${itemId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Cart-Id': effectiveCartId!,
+        },
+        body: JSON.stringify({ quantity }),
+        cache: 'no-store',
       },
-      body: JSON.stringify({ quantity }),
-      cache: 'no-store',
-    })
+    )
     const data = await res.json().catch(() => ({}))
     return NextResponse.json(data, { status: res.status })
   }
 
   if (action === 'remove') {
-    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items/${itemId}`, {
-      method: 'DELETE',
-      headers: { 'X-Cart-Id': effectiveCartId! },
-      cache: 'no-store',
-    })
+    const res = await fetch(
+      `${env.NEXT_PUBLIC_API_URL}/stores/${store}/cart/items/${itemId}`,
+      {
+        method: 'DELETE',
+        headers: { 'X-Cart-Id': effectiveCartId! },
+        cache: 'no-store',
+      },
+    )
     const data = await res.json().catch(() => ({}))
     return NextResponse.json(data, { status: res.status })
   }

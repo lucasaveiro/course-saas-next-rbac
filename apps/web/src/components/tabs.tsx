@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useParams } from 'next/navigation'
 
@@ -38,7 +38,9 @@ export function Tabs() {
           size="sm"
           className="border border-transparent text-muted-foreground data-[current=true]:border-border data-[current=true]:text-foreground"
         >
-          <NavLink href={`/org/${orgSlug}/settings`}>Settings & Billing</NavLink>
+          <NavLink href={`/org/${orgSlug}/settings`}>
+            Settings & Billing
+          </NavLink>
         </Button>
       </nav>
     </div>

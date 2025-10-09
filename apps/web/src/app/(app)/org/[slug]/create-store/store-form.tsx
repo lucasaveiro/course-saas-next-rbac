@@ -70,11 +70,7 @@ export function StoreForm() {
       </div>
 
       <Button className="w-full" type="submit" disabled={isPending}>
-        {isPending ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          'Save store'
-        )}
+        {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Save store'}
       </Button>
     </form>
   )

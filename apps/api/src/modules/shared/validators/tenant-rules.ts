@@ -27,14 +27,16 @@ export async function ensureUniqueStoreSlug(slug: string) {
   }
 }
 
-export async function ensureUniqueProductSlug(slug: string) {
-  const existing = await prisma.product.findUnique({
-    where: { slug },
-    select: { id: true, organizationId: true },
+export async function ensureUniqueProductSlug(slug: string, storeId: string) {
+  const existing = await prisma.product.findFirst({
+    where: { slug, storeId },
+    select: { id: true },
   })
 
   if (existing) {
-    throw new BadRequestError('A product with this slug already exists.')
+    throw new BadRequestError(
+      'A product with this slug already exists in this store.',
+    )
   }
 }
 

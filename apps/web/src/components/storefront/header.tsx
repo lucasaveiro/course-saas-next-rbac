@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
-import { resolveStoreSlug } from '@/lib/storefront'
 import { CartWidget } from '@/components/storefront/cart/cart-widget'
+import { resolveStoreSlug } from '@/lib/storefront'
 
 export async function StorefrontHeader({
   storeParam,
@@ -19,7 +19,10 @@ export async function StorefrontHeader({
       </Link>
 
       <nav className="flex items-center gap-4 text-sm">
-        <Link href={`${basePath}`} className="text-muted-foreground hover:text-foreground">
+        <Link
+          href={`${basePath}`}
+          className="text-muted-foreground hover:text-foreground"
+        >
           Home
         </Link>
         <Link

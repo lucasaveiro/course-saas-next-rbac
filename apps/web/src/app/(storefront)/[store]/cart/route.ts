@@ -1,8 +1,11 @@
+import { env } from '@saas/env'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { env } from '@saas/env'
 
-export async function GET(request: NextRequest, { params }: { params: { store: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { store: string } },
+) {
   const store = params.store
   const cookieStore = cookies()
   const cartId = cookieStore.get('cart_id')?.value

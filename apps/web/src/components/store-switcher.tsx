@@ -54,9 +54,7 @@ export function StoreSwitcher() {
                   )}
                   <AvatarFallback />
                 </Avatar>
-                <span className="truncate text-left">
-                  {currentStore.name}
-                </span>
+                <span className="truncate text-left">{currentStore.name}</span>
               </>
             ) : (
               <span className="text-muted-foreground">Select store</span>
@@ -84,9 +82,7 @@ export function StoreSwitcher() {
                 <DropdownMenuItem key={store.id} asChild>
                   <Link href={`/org/${orgSlug}/store/${store.slug}`}>
                     <Avatar className="mr-2 size-4">
-                      {store.avatarUrl && (
-                        <AvatarImage src={store.avatarUrl} />
-                      )}
+                      {store.avatarUrl && <AvatarImage src={store.avatarUrl} />}
                       <AvatarFallback />
                     </Avatar>
                     <span className="line-clamp-1">{store.name}</span>

@@ -12,23 +12,30 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
       message: 'Validation error',
       errors: error.flatten().fieldErrors,
     })
+    return
   }
 
-  if (error instanceof BadRequestError) {
+  if (error instanceof BadRequestError || error.name === 'BadRequestError') {
     reply.status(400).send({
       message: error.message,
     })
+    return
   }
 
-  if (error instanceof UnauthorizedError) {
+  if (error instanceof UnauthorizedError || error.name === 'UnauthorizedError') {
     reply.status(401).send({
       message: error.message,
     })
+    return
   }
 
   console.error(error)
 
   // send error to some observability platform
 
-  reply.status(500).send({ message: 'Internal server error' })
+  reply.status(500).send({
+    message: 'Internal server error',
+    errorName: (error as any)?.name,
+    errorMessage: (error as any)?.message,
+  })
 }

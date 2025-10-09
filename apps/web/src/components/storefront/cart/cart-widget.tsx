@@ -1,18 +1,30 @@
 'use client'
 
-import { useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
-import { useCart } from './use-cart'
+import { useState } from 'react'
+
 import { AddressAutocomplete } from '@/components/address-autocomplete'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { calculateFreightCostWithAddresses } from '@/lib/google-maps'
+import { calculateFreightCostWithAddressesFromItems } from '@/lib/google-maps'
+
+import { useCart } from './use-cart'
 
 export function CartWidget() {
-  const { data, isLoading, error, updateItem, removeItem, updateDeliveryAddress } = useCart()
+  const {
+    data,
+    isLoading,
+    error,
+    updateItem,
+    removeItem,
+    updateDeliveryAddress,
+  } = useCart()
   const [open, setOpen] = useState(false)
   const [deliveryAddress, setDeliveryAddress] = useState('')
-  const [freightInfo, setFreightInfo] = useState<{ cost: number; trips: number } | null>(null)
+  const [freightInfo, setFreightInfo] = useState<{
+    cost: number
+    trips: number
+  } | null>(null)
 
   const count = data?.items.reduce((acc, i) => acc + i.quantity, 0) ?? 0
 
@@ -31,19 +43,27 @@ export function CartWidget() {
         <div className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-[1200px] rounded-t-md border bg-background p-4 shadow-lg">
           <div className="mb-2 flex items-center justify-between">
             <strong className="text-sm">Seu carrinho</strong>
-            <button className="text-xs text-muted-foreground" onClick={() => setOpen(false)}>
+            <button
+              className="text-xs text-muted-foreground"
+              onClick={() => setOpen(false)}
+            >
               Fechar
             </button>
           </div>
 
-          {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
+          {isLoading && (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          )}
           {error && (
             <p className="text-sm text-red-500">Erro ao carregar o carrinho</p>
           )}
 
           <ul className="space-y-3">
             {data?.items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between gap-2">
+              <li
+                key={item.id}
+                className="flex items-center justify-between gap-2"
+              >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{item.name}</p>
                   <p className="text-xs text-muted-foreground">
@@ -54,7 +74,9 @@ export function CartWidget() {
                 <div className="flex items-center gap-2">
                   <button
                     className="rounded-md border px-2 py-1 text-xs"
-                    onClick={() => updateItem(item.id, Math.max(1, item.quantity - 1))}
+                    onClick={() =>
+                      updateItem(item.id, Math.max(1, item.quantity - 1))
+                    }
                   >
                     -
                   </button>
@@ -75,7 +97,7 @@ export function CartWidget() {
             ))}
           </ul>
 
-          {data?.items.length > 0 && (
+          {(data?.items?.length ?? 0) > 0 && (
             <div className="mt-4 space-y-3 border-t pt-3">
               <div className="space-y-2">
                 <Label htmlFor="delivery-address">Endereço de entrega</Label>
@@ -83,39 +105,45 @@ export function CartWidget() {
                   id="delivery-address"
                   value={deliveryAddress}
                   onChange={(address) => {
-                    setDeliveryAddress(address);
+                    setDeliveryAddress(address)
                     if (updateDeliveryAddress) {
-                      updateDeliveryAddress(address);
+                      updateDeliveryAddress(address)
                     }
                   }}
                   placeholder="Digite seu endereço para cálculo de frete"
                   className="w-full"
                 />
                 {deliveryAddress && (
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="mt-2 w-full"
                     onClick={async () => {
-                      if (!data?.storeSettings) return;
-                      
+                      if (!data?.storeSettings) return
+
                       try {
-                        const totalQuantity = data.items.reduce((acc, item) => {
-                          const product = item.product;
-                          return acc + (item.quantity * (product?.qtPerPallet ? 1 : 1));
-                        }, 0);
-                        
-                        const result = await calculateFreightCostWithAddresses({
-                          originAddress: data.storeSettings.storeAddress || '',
-                          destinationAddress: deliveryAddress,
-                          costPerKm: data.storeSettings.costPerKm || 1,
-                          totalQuantity,
-                          qtPerPallet: data.storeSettings.qtPerPallet || 100,
-                          maxTruckPallets: data.storeSettings.maxTruckPallets || 10
-                        });
-                        
-                        setFreightInfo(result);
+                        const items = data.items.map((item) => ({
+                          quantity: item.quantity,
+                          qtPerPallet:
+                            item.product?.qtPerPallet ??
+                            // fallback para API que retorna quantityPerPallet
+                            item.product?.quantityPerPallet ??
+                            undefined,
+                        }))
+
+                        const result =
+                          await calculateFreightCostWithAddressesFromItems({
+                            originAddress:
+                              data.storeSettings?.storeAddress || '',
+                            destinationAddress: deliveryAddress,
+                            costPerKm: data.storeSettings?.costPerKm || 1,
+                            items,
+                            maxTruckPallets:
+                              data.storeSettings?.maxTruckPallets || 10,
+                          })
+
+                        setFreightInfo(result)
                       } catch (err) {
-                        console.error('Erro ao calcular frete:', err);
+                        console.error('Erro ao calcular frete:', err)
                       }
                     }}
                   >
@@ -123,12 +151,15 @@ export function CartWidget() {
                   </Button>
                 )}
               </div>
-              
+
               {freightInfo && (
                 <div className="rounded-md bg-muted p-3 text-sm">
                   <p className="font-medium">Informações de frete:</p>
                   <p>Custo total: R$ {freightInfo.cost.toFixed(2)}</p>
-                  <p>Serão necessárias {freightInfo.trips} viagens para entregar todo o seu pedido.</p>
+                  <p>
+                    Serão necessárias {freightInfo.trips} viagens para entregar
+                    todo o seu pedido.
+                  </p>
                 </div>
               )}
             </div>

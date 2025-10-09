@@ -1,5 +1,6 @@
-import { resolveStoreSlug } from '@/lib/storefront'
 import { cookies } from 'next/headers'
+
+import { resolveStoreSlug } from '@/lib/storefront'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +58,9 @@ export default async function SearchPage({
       </form>
 
       {q && (
-        <p className="text-sm text-muted-foreground">Showing results for "{q}"</p>
+        <p className="text-sm text-muted-foreground">
+          Showing results for "{q}"
+        </p>
       )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

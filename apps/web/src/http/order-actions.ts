@@ -1,6 +1,12 @@
 import { api } from './api-client'
 
-export async function captureOrder({ storeSlug, orderId }: { storeSlug: string; orderId: string }) {
+export async function captureOrder({
+  storeSlug,
+  orderId,
+}: {
+  storeSlug: string
+  orderId: string
+}) {
   const result = await api
     .post(`stores/${storeSlug}/payments/capture`, {
       json: { orderId },
@@ -9,7 +15,13 @@ export async function captureOrder({ storeSlug, orderId }: { storeSlug: string; 
   return result
 }
 
-export async function refundOrder({ storeSlug, orderId }: { storeSlug: string; orderId: string }) {
+export async function refundOrder({
+  storeSlug,
+  orderId,
+}: {
+  storeSlug: string
+  orderId: string
+}) {
   const result = await api
     .post(`stores/${storeSlug}/payments/refund`, {
       json: { orderId },
@@ -18,14 +30,26 @@ export async function refundOrder({ storeSlug, orderId }: { storeSlug: string; o
   return result
 }
 
-export async function issueInvoice({ storeSlug, orderId }: { storeSlug: string; orderId: string }) {
+export async function issueInvoice({
+  storeSlug,
+  orderId,
+}: {
+  storeSlug: string
+  orderId: string
+}) {
   const result = await api
     .post(`stores/${storeSlug}/orders/${orderId}/invoice`)
     .json<{ invoiceNumber: string; status: string }>()
   return result
 }
 
-export async function startOrderFulfillment({ storeSlug, orderId }: { storeSlug: string; orderId: string }) {
+export async function startOrderFulfillment({
+  storeSlug,
+  orderId,
+}: {
+  storeSlug: string
+  orderId: string
+}) {
   const result = await api
     .post(`stores/${storeSlug}/orders/${orderId}/fulfillment`)
     .json<{ fulfillmentId: string; status: string }>()

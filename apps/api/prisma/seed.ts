@@ -22,19 +22,19 @@ async function seed() {
     },
   })
 
-  const anotherUser = await prisma.user.create({
+  const courtney = await prisma.user.create({
     data: {
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
+      name: 'Courtney Wyman',
+      email: 'Cleveland.Runte@gmail.com',
       avatarUrl: faker.image.avatarGitHub(),
       passwordHash,
     },
   })
 
-  const anotherUser2 = await prisma.user.create({
+  const raymond = await prisma.user.create({
     data: {
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
+      name: 'Raymond Lehner',
+      email: 'Omari.Wehner21@hotmail.com',
       avatarUrl: faker.image.avatarGitHub(),
       passwordHash,
     },
@@ -42,7 +42,7 @@ async function seed() {
 
   const orgAdmin = await prisma.organization.create({
     data: {
-      name: 'Acme Inc (Admin)',
+      name: 'Acme_Organization',
       domain: 'acme.com',
       slug: 'acme-admin',
       avatarUrl: faker.image.avatarGitHub(),
@@ -52,8 +52,8 @@ async function seed() {
         createMany: {
           data: [
             { userId: user.id, role: 'ADMIN' },
-            { userId: anotherUser.id, role: 'STORE_OWNER' },
-            { userId: anotherUser2.id, role: 'STORE_OWNER' },
+            { userId: courtney.id, role: 'CUSTOMER' },
+            { userId: raymond.id, role: 'STORE_OWNER' },
           ],
         },
       },
@@ -62,7 +62,7 @@ async function seed() {
 
   // Create sample stores for orgAdmin
   const adminStores = await Promise.all(
-    Array.from({ length: 3 }).map(() =>
+    Array.from({ length: 2 }).map(() =>
       prisma.store.create({
         data: {
           name: faker.company.name(),
@@ -70,7 +70,7 @@ async function seed() {
           description: faker.lorem.paragraph(),
           avatarUrl: faker.image.avatarGitHub(),
           organizationId: orgAdmin.id,
-          ownerId: faker.helpers.arrayElement([user.id, anotherUser.id, anotherUser2.id]),
+          ownerId: raymond.id,
           settings: {
             create: {
               currency: 'USD',
@@ -141,77 +141,7 @@ async function seed() {
     }
   }
 
-  const orgCustomer = await prisma.organization.create({
-    data: {
-      name: 'Acme Inc (Customer)',
-      slug: 'acme-customer',
-      avatarUrl: faker.image.avatarGitHub(),
-      ownerId: user.id,
-      members: {
-        createMany: {
-          data: [
-            { userId: user.id, role: 'CUSTOMER' },
-            { userId: anotherUser.id, role: 'ADMIN' },
-            { userId: anotherUser2.id, role: 'STORE_OWNER' },
-          ],
-        },
-      },
-    },
-  })
-
-  const customerStore = await prisma.store.create({
-    data: {
-      name: faker.company.name(),
-      slug: faker.lorem.slug(3),
-      description: faker.lorem.paragraph(),
-      avatarUrl: faker.image.avatarGitHub(),
-      organizationId: orgCustomer.id,
-      ownerId: user.id,
-      settings: {
-        create: {
-          currency: 'USD',
-          inventoryPolicy: 'RESERVE_ON_ORDER',
-          allowBackorders: false,
-        },
-      },
-    },
-  })
-
-  const orgMember = await prisma.organization.create({
-    data: {
-      name: 'Acme Inc (Member)',
-      slug: 'acme-member',
-      avatarUrl: faker.image.avatarGitHub(),
-      ownerId: user.id,
-      members: {
-        createMany: {
-          data: [
-            { userId: user.id, role: 'STORE_OWNER' },
-            { userId: anotherUser.id, role: 'ADMIN' },
-            { userId: anotherUser2.id, role: 'STORE_OWNER' },
-          ],
-        },
-      },
-    },
-  })
-
-  await prisma.store.create({
-    data: {
-      name: faker.company.name(),
-      slug: faker.lorem.slug(3),
-      description: faker.lorem.paragraph(),
-      avatarUrl: faker.image.avatarGitHub(),
-      organizationId: orgMember.id,
-      ownerId: user.id,
-      settings: {
-        create: {
-          currency: 'USD',
-          inventoryPolicy: 'RESERVE_ON_ORDER',
-          allowBackorders: false,
-        },
-      },
-    },
-  })
+  // Removed extra organizations (acme-customer, acme-member) to keep a single tenant
 }
 
 seed().then(() => {

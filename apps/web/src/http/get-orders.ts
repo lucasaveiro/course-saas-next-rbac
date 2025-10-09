@@ -1,6 +1,6 @@
 import { api } from './api-client'
 
-interface GetOrdersResponse {
+export interface GetOrdersResponse {
   orders: {
     id: string
     status: string

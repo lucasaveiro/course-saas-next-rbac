@@ -1,14 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 interface AddressAutocompleteProps {
   id: string
-  label: string
+  label?: string
   placeholder?: string
   defaultValue?: string
+  value?: string
+  className?: string
   onChange?: (address: string, placeId?: string) => void
 }
 
@@ -17,6 +20,8 @@ export function AddressAutocomplete({
   label,
   placeholder = 'Digite um endereço',
   defaultValue = '',
+  value,
+  className,
   onChange,
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -30,7 +35,7 @@ export function AddressAutocomplete({
     googleMapScript.async = true
     googleMapScript.defer = true
     window.document.body.appendChild(googleMapScript)
-    
+
     googleMapScript.addEventListener('load', () => {
       setLoaded(true)
     })
@@ -43,7 +48,8 @@ export function AddressAutocomplete({
   useEffect(() => {
     if (!loaded || !inputRef.current) return
 
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+    // Use typed global from @types/google.maps
+    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
       types: ['address'],
     })
 
@@ -67,13 +73,14 @@ export function AddressAutocomplete({
 
   return (
     <div className="space-y-1">
-      <Label htmlFor={id}>{label}</Label>
+      {label && <Label htmlFor={id}>{label}</Label>}
       <Input
         ref={inputRef}
         id={id}
-        value={address}
+        value={value ?? address}
         onChange={handleChange}
         placeholder={placeholder}
+        className={className}
       />
     </div>
   )

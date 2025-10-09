@@ -12,6 +12,8 @@ interface GetProductsResponse {
     length?: string | null
     depth?: string | null
     quantityPerPallet?: number | null
+    // Aggregated pricing from variants
+    price?: string | null
     createdAt: string
   }[]
   meta: {

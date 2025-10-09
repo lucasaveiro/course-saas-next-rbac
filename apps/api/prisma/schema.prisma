@@ -152,7 +152,7 @@ model Product {
   id          String   @id @default(uuid())
   name        String
   description String
-  slug        String   @unique
+  slug        String
   isActive    Boolean  @default(true) @map("is_active")
   // Physical attributes
   weight      Decimal?
@@ -176,6 +176,7 @@ model Product {
   cartItems    CartItem[]
   orderItems   OrderItem[]
 
+  @@unique([slug, storeId])
   @@map("products")
 }
 
@@ -213,7 +214,7 @@ model ProductOption {
 model Category {
   id          String   @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -230,13 +231,14 @@ model Category {
 
   products ProductCategory[]
 
+  @@unique([slug, storeId])
   @@map("categories")
 }
 
 model Collection {
   id          String   @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -249,6 +251,7 @@ model Collection {
 
   products ProductCollection[]
 
+  @@unique([slug, storeId])
   @@map("collections")
 }
 
@@ -581,7 +584,7 @@ model StoreSetting {
 model SalesChannel {
   id          String   @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String
   createdAt   DateTime @default(now()) @map("created_at")
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -590,6 +593,7 @@ model SalesChannel {
   store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   storeId String  @map("store_id")
 
+  @@unique([slug, storeId])
   @@map("sales_channels")
 }
 

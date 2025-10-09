@@ -56,8 +56,8 @@ export default async function Settings() {
             <CardHeader>
               <CardTitle>Shutdown organization</CardTitle>
               <CardDescription>
-                This will delete all organization data including all stores.
-                You cannot undo this action.
+                This will delete all organization data including all stores. You
+                cannot undo this action.
               </CardDescription>
             </CardHeader>
             <CardContent>

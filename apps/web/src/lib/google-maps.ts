@@ -3,23 +3,18 @@
  */
 export async function calculateDistance(
   originAddress: string,
-  destinationAddress: string
+  destinationAddress: string,
 ): Promise<number> {
   try {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
-      originAddress
-    )}&destinations=${encodeURIComponent(
-      destinationAddress
-    )}&key=${apiKey}`
+      originAddress,
+    )}&destinations=${encodeURIComponent(destinationAddress)}&key=${apiKey}`
 
     const response = await fetch(url)
     const data = await response.json()
 
-    if (
-      data.status === 'OK' &&
-      data.rows[0]?.elements[0]?.status === 'OK'
-    ) {
+    if (data.status === 'OK' && data.rows[0]?.elements[0]?.status === 'OK') {
       // Retorna a distância em quilômetros
       return data.rows[0].elements[0].distance.value / 1000
     } else {
@@ -40,17 +35,17 @@ export function calculateFreightCost(
   costPerKm: number,
   totalQuantity: number,
   qtPerPallet: number,
-  maxTruckPallets: number
+  maxTruckPallets: number,
 ): { cost: number; trips: number } {
   // Calcula o número de pallets necessários
   const pallets = Math.ceil(totalQuantity / qtPerPallet)
-  
+
   // Calcula o número de viagens necessárias
   const trips = Math.ceil(pallets / maxTruckPallets)
-  
+
   // Calcula o custo total do frete
   const cost = distanceKm * costPerKm * trips
-  
+
   return { cost, trips }
 }
 
@@ -63,24 +58,81 @@ export async function calculateFreightCostWithAddresses({
   costPerKm,
   totalQuantity,
   qtPerPallet,
-  maxTruckPallets
+  maxTruckPallets,
 }: {
-  originAddress: string;
-  destinationAddress: string;
-  costPerKm: number;
-  totalQuantity: number;
-  qtPerPallet: number;
-  maxTruckPallets: number;
+  originAddress: string
+  destinationAddress: string
+  costPerKm: number
+  totalQuantity: number
+  qtPerPallet: number
+  maxTruckPallets: number
 }): Promise<{ cost: number; trips: number }> {
   // Calcula a distância entre os endereços
-  const distance = await calculateDistance(originAddress, destinationAddress);
-  
+  const distance = await calculateDistance(originAddress, destinationAddress)
+
   // Usa a função existente para calcular o custo
   return calculateFreightCost(
     distance,
     costPerKm,
     totalQuantity,
     qtPerPallet,
-    maxTruckPallets
-  );
+    maxTruckPallets,
+  )
+}
+
+/**
+ * Calcula o custo do frete usando as quantidades por produto
+ */
+export function calculateFreightCostFromItems({
+  distanceKm,
+  costPerKm,
+  items,
+  maxTruckPallets,
+  fallbackQtPerPallet = 100,
+}: {
+  distanceKm: number
+  costPerKm: number
+  items: Array<{ quantity: number; qtPerPallet?: number | null }>
+  maxTruckPallets: number
+  fallbackQtPerPallet?: number
+}): { cost: number; trips: number } {
+  const totalPallets = items.reduce((acc, item) => {
+    const perPallet = item.qtPerPallet ?? fallbackQtPerPallet
+    const palletsForItem = Math.ceil(item.quantity / Math.max(perPallet, 1))
+    return acc + palletsForItem
+  }, 0)
+
+  const trips = Math.ceil(totalPallets / Math.max(maxTruckPallets, 1))
+  const cost = distanceKm * costPerKm * trips
+
+  return { cost, trips }
+}
+
+/**
+ * Calcula o custo do frete por endereços usando itens do carrinho
+ */
+export async function calculateFreightCostWithAddressesFromItems({
+  originAddress,
+  destinationAddress,
+  costPerKm,
+  items,
+  maxTruckPallets,
+  fallbackQtPerPallet = 100,
+}: {
+  originAddress: string
+  destinationAddress: string
+  costPerKm: number
+  items: Array<{ quantity: number; qtPerPallet?: number | null }>
+  maxTruckPallets: number
+  fallbackQtPerPallet?: number
+}): Promise<{ cost: number; trips: number }> {
+  const distance = await calculateDistance(originAddress, destinationAddress)
+
+  return calculateFreightCostFromItems({
+    distanceKm: distance,
+    costPerKm,
+    items,
+    maxTruckPallets,
+    fallbackQtPerPallet,
+  })
 }

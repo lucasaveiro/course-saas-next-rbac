@@ -17,6 +17,8 @@ export const permissions: Record<Role, PermissionsByRole> = {
     can('get', 'User')
     can(['create', 'get'], 'Store')
     can(['update', 'delete'], 'Store', { ownerId: { $eq: user.id } })
+    // Catálogo e inventário visíveis para dono de loja
+    can(['get', 'manage'], 'Product')
   },
   STORE_ADMIN(_, { can }) {
     can('get', 'User')
@@ -33,6 +35,7 @@ export const permissions: Record<Role, PermissionsByRole> = {
     can('get', 'Product')
   },
   CUSTOMER(_, { can }) {
+    // Cliente não acessa gestão interna; apenas Billing (checkout)
     can('manage', 'Billing')
   },
 }

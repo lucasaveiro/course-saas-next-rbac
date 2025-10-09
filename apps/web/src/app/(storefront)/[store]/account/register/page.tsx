@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 
-export default function CustomerRegisterPage({ params }: { params: { store: string } }) {
+export default function CustomerRegisterPage({
+  params,
+}: {
+  params: { store: string }
+}) {
   const storeSlug = params.store
   const [pending, setPending] = useState(false)
 
@@ -14,13 +18,17 @@ export default function CustomerRegisterPage({ params }: { params: { store: stri
       </p>
 
       <form
-        action={`/` + encodeURIComponent(storeSlug) + `/account/register/action`}
+        action={
+          `/` + encodeURIComponent(storeSlug) + `/account/register/action`
+        }
         method="POST"
         onSubmit={() => setPending(true)}
         className="space-y-4"
       >
         <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium">Nome</label>
+          <label htmlFor="name" className="block text-sm font-medium">
+            Nome
+          </label>
           <input
             id="name"
             name="name"
@@ -32,7 +40,9 @@ export default function CustomerRegisterPage({ params }: { params: { store: stri
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">E-mail</label>
+          <label htmlFor="email" className="block text-sm font-medium">
+            E-mail
+          </label>
           <input
             id="email"
             name="email"
@@ -44,7 +54,9 @@ export default function CustomerRegisterPage({ params }: { params: { store: stri
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">Senha</label>
+          <label htmlFor="password" className="block text-sm font-medium">
+            Senha
+          </label>
           <input
             id="password"
             name="password"
@@ -66,7 +78,10 @@ export default function CustomerRegisterPage({ params }: { params: { store: stri
 
       <p className="mt-4 text-sm">
         Já tem conta?{' '}
-        <a href={`/${encodeURIComponent(storeSlug)}/account/login`} className="underline">
+        <a
+          href={`/${encodeURIComponent(storeSlug)}/account/login`}
+          className="underline"
+        >
           Entrar
         </a>
       </p>

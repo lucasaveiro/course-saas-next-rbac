@@ -1,13 +1,14 @@
 /* eslint-disable no-useless-constructor */
+import { Prisma } from '@prisma/client'
+
 import { BadRequestError } from '@/http/routes/_errors/bad-request-error'
+import { prisma } from '@/lib/prisma'
 import { ProductRepository } from '@/modules/catalog/repositories/product-repository'
 import {
   ensureStoreBelongsToOrganization,
   ensureUniqueProductSlug,
 } from '@/modules/shared/validators/tenant-rules'
 import { createSlug } from '@/utils/create-slug'
-import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 type CreateProductParams = {
   organizationId: string
@@ -39,7 +40,7 @@ export class ProductService {
       params.organizationId,
     )
     const slug = createSlug(params.name)
-    await ensureUniqueProductSlug(slug)
+    await ensureUniqueProductSlug(slug, params.storeId)
 
     const created = await this.repo.create({
       organizationId: params.organizationId,
@@ -79,27 +80,31 @@ export class ProductService {
   async updateProduct(
     productId: string,
     organizationId: string,
+    storeId: string,
     updates: UpdateProductParams,
   ) {
-    if (updates.slug) {
-      await ensureUniqueProductSlug(updates.slug)
-    }
-    // Optional: verify the product belongs to organization before updating
-    const existing = await this.repo.findBySlug(
-      organizationId,
-      updates.slug ?? '',
-    )
-    if (updates.slug && existing && existing.id !== productId) {
-      throw new BadRequestError(
-        'Another product with same slug already exists.',
-      )
+    // Verify product belongs to organization and store
+    const product = await prisma.product.findFirst({
+      where: { id: productId, organizationId, storeId },
+      select: { id: true },
+    })
+    if (!product) {
+      throw new BadRequestError('Product not found in this store.')
     }
 
-    // Implement an update method in repository if needed; for now, use Prisma directly
-    // Keeping updates minimal and validated above
-    return await (
-      await import('@/lib/prisma')
-    ).prisma.product.update({
+    if (updates.slug) {
+      const existing = await prisma.product.findFirst({
+        where: { slug: updates.slug, storeId },
+        select: { id: true },
+      })
+      if (existing && existing.id !== productId) {
+        throw new BadRequestError(
+          'Another product with same slug already exists in this store.',
+        )
+      }
+    }
+
+    return await prisma.product.update({
       where: { id: productId },
       data: {
         name: updates.name,
