@@ -6,6 +6,7 @@ export interface StorefrontProduct {
   slug: string
   description?: string | null
   price?: string | null
+  variantId?: string | null
   createdAt: string
 }
 

@@ -1,5 +1,6 @@
 import { resolveStoreSlug } from '@/lib/storefront'
 import { getStorefrontProducts } from '@/http/get-storefront-products'
+import { ProductCard } from '@/components/storefront/product-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,17 +55,7 @@ export default async function StorefrontHome({
             </p>
           ) : (
             products.map((p) => (
-              <article key={p.id} className="rounded border p-4">
-                <h2 className="text-base font-medium">{p.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {p.price
-                    ? Number(p.price).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      })
-                    : '—'}
-                </p>
-              </article>
+              <ProductCard key={p.id} store={store} product={p} />
             ))
           )}
         </section>

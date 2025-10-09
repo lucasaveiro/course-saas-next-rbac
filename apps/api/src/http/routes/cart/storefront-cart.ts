@@ -135,10 +135,6 @@ export async function storefrontCart(app: FastifyInstance) {
         })
         if (!variant) throw new BadRequestError('Variant not found.')
 
-        if (variant.inventoryQuantity < quantity) {
-          return reply.status(409).send({ message: 'Insufficient inventory', available: variant.inventoryQuantity })
-        }
-
         // merge with existing line item if present
         const existing = await prisma.cartItem.findFirst({ where: { cartId, variantId } })
 
@@ -148,9 +144,6 @@ export async function storefrontCart(app: FastifyInstance) {
         let itemId: string
         if (existing) {
           const newQty = existing.quantity + quantity
-          if (variant.inventoryQuantity < newQty) {
-            return reply.status(409).send({ message: 'Insufficient inventory', available: variant.inventoryQuantity })
-          }
           const newTotal = new Prisma.Decimal(newQty).mul(unitPrice)
           const updated = await prisma.cartItem.update({
             where: { id: existing.id },
@@ -213,10 +206,6 @@ export async function storefrontCart(app: FastifyInstance) {
           select: { inventoryQuantity: true },
         })
         if (!variant) throw new BadRequestError('Variant not found.')
-
-        if (variant.inventoryQuantity < quantity) {
-          return reply.status(409).send({ message: 'Insufficient inventory', available: variant.inventoryQuantity })
-        }
 
         const newTotal = new Prisma.Decimal(quantity).mul(item.unitPrice)
         await prisma.cartItem.update({ where: { id: itemId }, data: { quantity, totalPrice: newTotal } })

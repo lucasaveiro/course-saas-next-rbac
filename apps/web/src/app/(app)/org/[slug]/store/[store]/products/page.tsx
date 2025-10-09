@@ -35,6 +35,8 @@ import { getMembership } from '@/http/get-membership'
 import { getProducts } from '@/http/get-products'
 import { getStore } from '@/http/get-store'
 import { updateProduct } from '@/http/update-product'
+import { updateProductPrice } from '@/http/update-product-price'
+import { updateProductAttributes } from '@/http/update-product-attributes'
 import { queryClient } from '@/lib/react-query'
 
 export default function ProductsPage() {
@@ -57,6 +59,12 @@ export default function ProductsPage() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
+  const [editPrice, setEditPrice] = useState('')
+  const [editWeight, setEditWeight] = useState('')
+  const [editWidth, setEditWidth] = useState('')
+  const [editLength, setEditLength] = useState('')
+  const [editDepth, setEditDepth] = useState('')
+  const [editQtPerPallet, setEditQtPerPallet] = useState<number | ''>('')
   const [editErrorMessage, setEditErrorMessage] = useState<string | null>(null)
 
   const { data: store } = useQuery({
@@ -136,6 +144,7 @@ export default function ProductsPage() {
     useMutation({
       mutationFn: async () => {
         if (!editingProductId || !store?.id) return
+        // Update base product fields (name/description)
         await updateProduct({
           org,
           storeId: store.id,
@@ -143,6 +152,38 @@ export default function ProductsPage() {
           name: editName || undefined,
           description: editDescription || undefined,
         })
+
+        // Update price if provided
+        if (editPrice !== '') {
+          await updateProductPrice({
+            org,
+            storeId: store.id,
+            productId: editingProductId,
+            price: editPrice,
+          })
+        }
+
+        // Update physical attributes if any provided
+        const hasAttributesUpdate =
+          editWeight !== '' ||
+          editWidth !== '' ||
+          editLength !== '' ||
+          editDepth !== '' ||
+          typeof editQtPerPallet === 'number'
+
+        if (hasAttributesUpdate) {
+          await updateProductAttributes({
+            org,
+            storeId: store.id,
+            productId: editingProductId,
+            weight: editWeight || undefined,
+            width: editWidth || undefined,
+            length: editLength || undefined,
+            depth: editDepth || undefined,
+            quantityPerPallet:
+              typeof editQtPerPallet === 'number' ? editQtPerPallet : undefined,
+          })
+        }
       },
       onError: async (err) => {
         if (err instanceof HTTPError) {
@@ -170,6 +211,18 @@ export default function ProductsPage() {
                       ...p,
                       name: editName || p.name,
                       description: editDescription || p.description,
+                      price:
+                        editPrice !== ''
+                          ? Number(editPrice)
+                          : p.price,
+                      weight: editWeight !== '' ? Number(editWeight) : p.weight,
+                      width: editWidth !== '' ? Number(editWidth) : p.width,
+                      length: editLength !== '' ? Number(editLength) : p.length,
+                      depth: editDepth !== '' ? Number(editDepth) : p.depth,
+                      quantityPerPallet:
+                        typeof editQtPerPallet === 'number'
+                          ? editQtPerPallet
+                          : p.quantityPerPallet,
                     }
                   : p,
               )
@@ -180,6 +233,12 @@ export default function ProductsPage() {
         setEditingProductId(null)
         setEditName('')
         setEditDescription('')
+        setEditPrice('')
+        setEditWeight('')
+        setEditWidth('')
+        setEditLength('')
+        setEditDepth('')
+        setEditQtPerPallet('')
         setEditErrorMessage(null)
       },
     })
@@ -386,6 +445,77 @@ export default function ProductsPage() {
                   onChange={(e) => setEditDescription(e.target.value)}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="edit-price">Price</Label>
+                  <Input
+                    id="edit-price"
+                    type="number"
+                    step="0.01"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-weight">Weight</Label>
+                  <Input
+                    id="edit-weight"
+                    type="number"
+                    step="0.001"
+                    value={editWeight}
+                    onChange={(e) => setEditWeight(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="edit-width">Width</Label>
+                  <Input
+                    id="edit-width"
+                    type="number"
+                    step="0.001"
+                    value={editWidth}
+                    onChange={(e) => setEditWidth(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-length">Length</Label>
+                  <Input
+                    id="edit-length"
+                    type="number"
+                    step="0.001"
+                    value={editLength}
+                    onChange={(e) => setEditLength(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-depth">Depth</Label>
+                  <Input
+                    id="edit-depth"
+                    type="number"
+                    step="0.001"
+                    value={editDepth}
+                    onChange={(e) => setEditDepth(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="edit-qtPerPallet">Quantity per pallet</Label>
+                <Input
+                  id="edit-qtPerPallet"
+                  type="number"
+                  value={
+                    editQtPerPallet === '' ? '' : String(editQtPerPallet)
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setEditQtPerPallet(val === '' ? '' : Number(val))
+                  }}
+                />
+              </div>
             </div>
             <SheetFooter>
               <Button
@@ -452,6 +582,36 @@ export default function ProductsPage() {
                           setEditingProductId(product.id)
                           setEditName(product.name)
                           setEditDescription(product.description ?? '')
+                          setEditPrice(
+                            product.price !== null && product.price !== undefined
+                              ? String(product.price)
+                              : '',
+                          )
+                          setEditWeight(
+                            product.weight !== null &&
+                            product.weight !== undefined
+                              ? String(product.weight)
+                              : '',
+                          )
+                          setEditWidth(
+                            product.width !== null && product.width !== undefined
+                              ? String(product.width)
+                              : '',
+                          )
+                          setEditLength(
+                            product.length !== null &&
+                            product.length !== undefined
+                              ? String(product.length)
+                              : '',
+                          )
+                          setEditDepth(
+                            product.depth !== null && product.depth !== undefined
+                              ? String(product.depth)
+                              : '',
+                          )
+                          setEditQtPerPallet(
+                            product.quantityPerPallet ?? ''
+                          )
                           setIsEditOpen(true)
                         }}
                       >

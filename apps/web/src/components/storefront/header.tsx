@@ -37,6 +37,12 @@ export async function StorefrontHeader({
         >
           Search
         </Link>
+        <Link
+          href={`${basePath}/cart`}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Cart
+        </Link>
         <CartWidget />
       </nav>
     </header>

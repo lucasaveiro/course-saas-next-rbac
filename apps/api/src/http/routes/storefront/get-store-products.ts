@@ -26,7 +26,10 @@ export async function getStorefrontProducts(app: FastifyInstance) {
                   name: z.string(),
                   description: z.string().nullable().optional(),
                   slug: z.string(),
+                  // Lowest price among variants
                   price: z.string().nullable().optional(),
+                  // Expose the variantId for add-to-cart convenience (lowest price variant)
+                  variantId: z.string().uuid().nullable().optional(),
                   createdAt: z.string(),
                 }),
               ),
@@ -68,7 +71,7 @@ export async function getStorefrontProducts(app: FastifyInstance) {
               slug: true,
               createdAt: true,
               variants: {
-                select: { price: true },
+                select: { id: true, price: true },
                 orderBy: { price: 'asc' },
                 take: 1,
               },
@@ -84,6 +87,7 @@ export async function getStorefrontProducts(app: FastifyInstance) {
           slug: p.slug,
           createdAt: p.createdAt.toISOString?.() ?? (p.createdAt as unknown as string),
           price: p.variants?.[0]?.price?.toString?.() ?? null,
+          variantId: p.variants?.[0]?.id ?? null,
         }))
 
         const totalPages = Math.max(1, Math.ceil(total / perPage))
